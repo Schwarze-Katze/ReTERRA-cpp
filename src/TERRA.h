@@ -2,12 +2,14 @@
 #include <iostream>
 #include <string>
 #include <time.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 // #include <CGAL/Random.h>
 #include <random>
 
+#include "Voronoi.h"
 
-typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef Kernel::Point_2 Point_2;
 
 namespace TERRAConfig {
@@ -28,11 +30,10 @@ namespace TERRAConfig {
         /* data */
     public:
         ConfigParam();
-        ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char const* fullname);
+        ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char * fullname);
         ~ConfigParam();
-    } configParam;
+    };
 
-    
     // ECU_CSURP Parameters
     //     Target = Target Points of the scenario
     //     TargetCnt = Number of target points
@@ -57,9 +58,8 @@ namespace TERRAConfig {
         ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area);
         ~ProblemParam();
         int SceneGenerator();
-    } problemParam;
-
-
+    };
+    
     // UGV Path Planning (GA) Parameters
     //     popSize = size of the population of chromosomes.
     //     tournaments = number of chromosomes to select for the tournament selection
@@ -82,9 +82,8 @@ namespace TERRAConfig {
         UGVData();
         UGVData(double vugv, int popSize, int tour, int mutOpr, double mutRate, int crossOpr, double eliteP);
         ~UGVData();
-    } ugvData;
+    };
 
-    
     // UAV Path Planning Parameters
     //     Tt : Total time budget[budget] budget = flight seconds
     //     Vuav : UAV's speed [m/s]
@@ -104,10 +103,16 @@ namespace TERRAConfig {
         UAVData();
         UAVData(double timeBudget, double vuav, double timeLanding, double timeTakeoff);
         ~UAVData();
-    } uavData;
-
+    };
 
 } // namespace TERRAConfig
+
+namespace TERRAConfig {
+    extern ConfigParam configParam;
+    extern ProblemParam problemParam;
+    extern UGVData ugvData;
+    extern UAVData uavData;
+}
 
 namespace TERRAResult {
     class DataSolution

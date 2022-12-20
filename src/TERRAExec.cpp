@@ -1,10 +1,17 @@
 #include <iostream>
 #include "TERRA.h"
 
-using namespace TERRAConfig;
 
-int initTERRAParam();
-int TERRALaunch();
+
+inline int initTERRAParam();
+inline int TERRALaunch();
+
+namespace TERRAConfig{
+    ConfigParam configParam = ConfigParam(1, true, true, false, "placeholder");
+    ProblemParam problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200);
+    UGVData ugvData = UGVData(0.4, 430, 9, 2, 0.06, 1, 2.7);
+    UAVData uavData = UAVData(308, 0.5, 4, 4);
+}
 
 int main() {
     std::cout << "hello world" << std::endl;
@@ -13,15 +20,14 @@ int main() {
     return 0;
 }
 
-int initTERRAParam() {
-    TERRAConfig::configParam = TERRAConfig::ConfigParam(1, true, true, false, "placeholder");
-    TERRAConfig::problemParam = TERRAConfig::ProblemParam(20, 0, 1, 0.5, 0.5, 200);
-    TERRAConfig::ugvData = TERRAConfig::UGVData(0.4, 430, 9, 2, 0.06, 1, 2.7);
-    TERRAConfig::uavData = TERRAConfig::UAVData(308, 0.5, 4, 4);
+inline int initTERRAParam() {
+    // using namespace TERRAConfig;
+    TERRAConfig::configParam;
     return 0;
 }
 
-int TERRALaunch() {
+inline int TERRALaunch() {
+    using namespace TERRAConfig;
     std::string iterDir;
     for (int iter = 0;iter < configParam.iterations;++iter) {
         std::cout << "Start computing scenario " << iter << std::endl;

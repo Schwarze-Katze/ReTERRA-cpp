@@ -5,7 +5,7 @@ namespace TERRAConfig {
     
     ConfigParam::ConfigParam() { }
 
-    ConfigParam::ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char const* fullname):iterations(iter), printResults(printAns), saveResults(saveAns), Vrep(vrep), fullName(fullname) {
+    ConfigParam::ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char* fullname):iterations(iter), printResults(printAns), saveResults(saveAns), Vrep(vrep), fullName(fullname) {
         time_t now = time(0);
         tm* ltm = localtime(&now);
         saveDir = "Results\\Test-" + std::to_string(ltm->tm_year + 1900) + "." + std::to_string(ltm->tm_mon + 1) + "." + std::to_string(ltm->tm_mday) + "." + std::to_string(ltm->tm_hour) + "." + std::to_string(ltm->tm_min) + "\\";
@@ -95,5 +95,6 @@ namespace TERRAResult {
 }
 
 int TERRA() {
-    
+    std::vector<Point_2> V1, coveredTarget;
+    VoronoiCoveringTimeOptimize(V1, coveredTarget);
 }
