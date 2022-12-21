@@ -1,7 +1,4 @@
-#include <iostream>
 #include "TERRA.h"
-
-
 
 inline int initTERRAParam();
 inline int TERRALaunch();

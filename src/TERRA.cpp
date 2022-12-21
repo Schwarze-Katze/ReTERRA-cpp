@@ -1,4 +1,3 @@
-#pragma once
 #include "TERRA.h"
 
 namespace TERRAConfig {
@@ -91,10 +90,18 @@ namespace TERRAConfig {
 }
 
 namespace TERRAResult {
-    
+    DataSolution::DataSolution(/* args */) { }
+
+    DataSolution::~DataSolution() { }
+
+    PathSolution::PathSolution(/* args */) { }
+
+    PathSolution::~PathSolution() { }
 }
 
 int TERRA() {
     std::vector<Point_2> V1, coveredTarget;
     VoronoiCoveringTimeOptimize(V1, coveredTarget);
+    GreedySetCovering(V1, coveredTarget);
+    return 0;
 }

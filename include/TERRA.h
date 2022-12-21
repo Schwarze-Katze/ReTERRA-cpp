@@ -3,11 +3,10 @@
 #include <string>
 #include <time.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-// #include <CGAL/Random.h>
 #include <random>
 
 #include "Voronoi.h"
-
+#include "SetCover.h"
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef Kernel::Point_2 Point_2;
@@ -124,13 +123,6 @@ namespace TERRAResult {
         ~DataSolution();
     };
     
-    DataSolution::DataSolution(/* args */)
-    {
-    }
-    
-    DataSolution::~DataSolution()
-    {
-    }
 
     class PathSolution
     {
@@ -140,14 +132,6 @@ namespace TERRAResult {
         PathSolution(/* args */);
         ~PathSolution();
     };
-    
-    PathSolution::PathSolution(/* args */)
-    {
-    }
-    
-    PathSolution::~PathSolution()
-    {
-    }
     
 }
 
@@ -175,5 +159,4 @@ namespace TERRAResult {
 //   }
 //  path_sol :paths of both UGV-UAV to reach the solutions computed in the algorithm.
 //  figures  :list of figures with the solutions of each algorithm stage
-
 int TERRA();
