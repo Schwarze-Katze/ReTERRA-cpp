@@ -8,7 +8,7 @@ set(CMAKE_BUILD_TYPE Release)
 find_package(CGAL REQUIRED QUIET OPTIONAL_COMPONENTS Core)
 if ( NOT CGAL_FOUND )
   message(STATUS "This project requires the CGAL library, and will not be compiled.")
-  return()  
+  return()
 endif()
 include_directories(${CGAL_INCLUDE_DIRS})
 link_libraries(${CGAL_LIBRARIES})
@@ -17,9 +17,17 @@ link_libraries(${CGAL_LIBRARIES})
 find_package( Boost REQUIRED )
 if ( NOT Boost_FOUND )
   message(STATUS "This project requires the Boost library, and will not be compiled.")
-  return()  
+  return()
 endif()
 
+#This project requires Eigen
+find_package( Eigen3 REQUIRED )
+if ( NOT Eigen3_FOUND )
+  message(STATUS "This project requires the Eigen library, and will not be compiled.")
+  return()
+endif()
+include_directories(${EIGEN3_INCLUDE_DIRS})
+link_libraries(${EIGEN3_LIBRARIES})
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include

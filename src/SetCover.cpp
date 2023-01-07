@@ -24,36 +24,30 @@
 // 	doi = 10.1093/bioinformatics/btq649 
 int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2) {
     const int tlen = coveredTarget.size(), vlen = V1.size();
-    vector<vector<bool>> setCoverTable(tlen);
-    for (auto& tmp : setCoverTable) {
-        tmp.resize(vlen);
-    }
+    //vector<vector<bool>> setCoverTable(tlen);
+    
+    MatrixXi setCoverTable(tlen, vlen);
     for (int i = 0;i < tlen;++i) {
         for (int j = 0;j < vlen;++j) {
             double d = sqrt((coveredTarget[i] - V1[j]).squared_length());
             if (d <= TERRAConfig::problemParam.Radius) {
-                setCoverTable[i][j] = 1;
+                setCoverTable(i, j) = 1;
             }
             else {
-                setCoverTable[i][j] = 0;
+                setCoverTable(i, j) = 0;
             }
         }
     }
 //  Building scp_table, without empty columns. Deleting the vertices which
 //  don't surround any waypoint
     std::vector<int> deletedVertices;
-    vector<vector<bool>> setCoverTable_s(tlen);
+    MatrixXi setCoverTable_s(tlen, 0);
     for (int i = 0;i < vlen;++i) {
-        bool isCopy = false;
-        for (int j = 0;j < tlen;++j) {
-            if (setCoverTable[j][i]) {
-                isCopy = true;
-            }
-        }
-        if (isCopy) {
-            for (int j = 0;j < tlen;++j) {
-                setCoverTable_s[j].push_back(setCoverTable[j][i]);
-            }
+        
+        if (setCoverTable(all, i).any()) {
+            //setCoverTable_s(all, Eigen::lastp1) = setCoverTable(all, i);
+            setCoverTable_s.conservativeResize(NoChange, setCoverTable_s.cols() + 1);
+            setCoverTable_s(all, last) = setCoverTable(all, i);
         }
         else {
             deletedVertices.push_back(i);
@@ -75,31 +69,69 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
         Lp.pop_back();
     }
     std::reverse(Lp.begin(), Lp.end());
-
-    vector<int> setsCardinalitiesV(Lp.size());
-    for (auto& tmp : setCoverTable_s) {
-        for (int i = 0;i < tmp.size();++i) {
-            setsCardinalitiesV[i] += tmp[i];
-        }
-    }
-    vector<int> setsCardinalitiesL(vlen);
-    for (int i = 0;i < vlen;++i) {
-        setsCardinalitiesL[i] = std::accumulate(setCoverTable_s[i].begin(), setCoverTable_s[i].end(), 0);
-    }
+    auto tmpv = setCoverTable_s.colwise().sum().array();
+    VectorXi setsCardinalitiesV = tmpv;
+    auto tmpl = setCoverTable_s.rowwise().sum().array();
+    VectorXi setsCardinalitiesL = tmpl;
     auto& A = setCoverTable_s;
-    auto& setsLabelsV = Lp;
+    VectorXi setsLabelsV(Lp.data(), Lp.size());
     auto solution_setsLabelsV = SetCoveringProblem(A, setsLabelsV, setsCardinalitiesV, setsCardinalitiesL);
 
     return 0;
 }
 
-vector<int> SetCoveringProblem(vector<vector<bool>>& A, vector<int>& setsLabelsV, vector<int>& setsCardinalitiesV, vector<int>& setsCardinalitiesL) {
+VectorXi SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL) {
     //Identify elements covered by just one set and select them
-    vector<bool> UniquelyCoveredL(setsCardinalitiesL.size());
+    vector<int> UniquelyCoveredL;
     for (int i = 0;i < setsCardinalitiesL.size();++i) {
-        UniquelyCoveredL[i] = (setsCardinalitiesL[i] == 1);
+        if (setsCardinalitiesL[i] == 1) {
+            UniquelyCoveredL.push_back(i);
+        }
     }
-    if (std::accumulate(UniquelyCoveredL.begin(), UniquelyCoveredL.end(), 0) > 0) {
-        //TODO
+    //construct solutions
+    MatrixXi solutionA;
+    VectorXi solutionSetsLabelsV;
+    VectorXi remainingElementsL;
+    if (!UniquelyCoveredL.empty()) {
+        //toBeSelectL = logical(sum(A(UniquelyCoveredL,:), 1)) ;
+        vector<int> toBeSelectedL, notToBeSelectedL;
+        auto tmp = A(UniquelyCoveredL, all).colwise().sum().array();
+        for (int i = 0;i < tmp.size();++i) {
+            if (tmp(i)>0) {
+                toBeSelectedL.push_back(i);
+            }
+            else {
+                notToBeSelectedL.push_back(i);
+            }
+        }
+        //solution_A = A(:, toBeSelectL) ;
+        solutionA = A(all, toBeSelectedL);
+        solutionSetsLabelsV = setsLabelsV(toBeSelectedL);
+        A = A(all, notToBeSelectedL).eval();
+        setsLabelsV = setsLabelsV(notToBeSelectedL).eval();
+        setsCardinalitiesV = setsCardinalitiesV(notToBeSelectedL).eval();
+        remainingElementsL = solutionA.rowwise().sum().array() == 0;
+    }
+    else {
+        remainingElementsL.resize(A.rows());
+        remainingElementsL.fill(1);
+    }
+    if (remainingElementsL.size()) {
+        std::sort(setsCardinalitiesV.data(), setsCardinalitiesV.data() + setsCardinalitiesV.size(), std::greater<int>());
+        VectorXi sortedIndexVector(setsCardinalitiesV.size());
+        std::iota(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), 0);
+        std::sort(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), [&](int i, int j) {return setsCardinalitiesV(i) > setsCardinalitiesV(j);});
+        setsLabelsV = setsLabelsV(sortedIndexVector).eval();
+        A = A(all, setsLabelsV).eval();
+    }
+    while (remainingElementsL.size()) {
+        int thresholdN = 0;
+        for (int i = 0;i < remainingElementsL.size();++i) {
+            thresholdN += A(i, 1) and remainingElementsL(i);
+        }
+        VectorXi indexFocusedSetsLogical = setsCardinalitiesV.array() >= thresholdN;
+        MatrixXi focusedSetsA = A(all, indexFocusedSetsLogical).eval();
+        VectorXi focusedLabelsV = setsLabelsV(indexFocusedSetsLogical).eval();
+        //TODO:greedy_scp.m:376
     }
 }

@@ -100,8 +100,8 @@ namespace TERRAResult {
 }
 
 int TERRA() {
-    std::vector<Point_2> V1, coveredTarget;
+    std::vector<Point_2> V1, coveredTarget, V2;
     VoronoiCoveringTimeOptimize(V1, coveredTarget);
-    GreedySetCovering(V1, coveredTarget);
+    GreedySetCovering(V1, coveredTarget, V2);
     return 0;
 }
