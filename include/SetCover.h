@@ -15,7 +15,8 @@ using Eigen::last;
 using Eigen::NoChange;
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
+using Eigen::seq;
 
-int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2);
+int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV);
 
-inline VectorXi SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL);
+inline int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL, MatrixXi& solutionA, VectorXi& solutionSetsLabelsV);

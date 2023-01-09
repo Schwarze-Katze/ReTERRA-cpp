@@ -101,7 +101,13 @@ namespace TERRAResult {
 
 int TERRA() {
     std::vector<Point_2> V1, coveredTarget, V2;
+    MatrixXi setCoverTable;
+    VectorXi solutionSetsLabelsV;
+    // (1) Compute Voronoi Diagram
     VoronoiCoveringTimeOptimize(V1, coveredTarget);
-    GreedySetCovering(V1, coveredTarget, V2);
+    // (2) Compute Set Covering Problem
+    GreedySetCovering(V1, coveredTarget, V2, setCoverTable, solutionSetsLabelsV);
+    // Check If Home is a vertex of the solution
+    
     return 0;
 }

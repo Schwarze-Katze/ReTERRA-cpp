@@ -21,7 +21,7 @@ if ( NOT Boost_FOUND )
 endif()
 
 #This project requires Eigen
-find_package( Eigen3 REQUIRED )
+find_package( Eigen3 REQUIRED 3.4.0)
 if ( NOT Eigen3_FOUND )
   message(STATUS "This project requires the Eigen library, and will not be compiled.")
   return()
