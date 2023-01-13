@@ -4,7 +4,7 @@ namespace TERRAConfig {
     
     ConfigParam::ConfigParam() { }
 
-    ConfigParam::ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char* fullname):iterations(iter), printResults(printAns), saveResults(saveAns), Vrep(vrep), fullName(fullname) {
+    ConfigParam::ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, const std::string& _fullname):iterations(iter), printResults(printAns), saveResults(saveAns), Vrep(vrep), fullName(_fullname) {
         time_t now = time(0);
         tm* ltm = localtime(&now);
         saveDir = "Results\\Test-" + std::to_string(ltm->tm_year + 1900) + "." + std::to_string(ltm->tm_mon + 1) + "." + std::to_string(ltm->tm_mday) + "." + std::to_string(ltm->tm_hour) + "." + std::to_string(ltm->tm_min) + "\\";
@@ -19,7 +19,7 @@ namespace TERRAConfig {
     ConfigParam::~ConfigParam() { }
 
 
-    ProblemParam::ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area):Radius(radius), TargetCnt(targetCnt), Delta(delta), AreaSize(area) {
+    ProblemParam::ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area, const std::string& _Gp):Radius(radius), TargetCnt(targetCnt), Delta(delta), AreaSize(area), Gp(_Gp) {
         Home = Point_2(homeX, homeY);
     }
     ProblemParam::ProblemParam() { }
@@ -100,7 +100,7 @@ namespace TERRAResult {
 }
 
 int TERRA() {
-    std::vector<Point_2> V1, coveredTarget, V2;
+    vector<Point_2> V1, coveredTarget, V2;
     MatrixXi setCoverTable;
     VectorXi solutionSetsLabelsV;
     // (1) Compute Voronoi Diagram
@@ -108,6 +108,29 @@ int TERRA() {
     // (2) Compute Set Covering Problem
     GreedySetCovering(V1, coveredTarget, V2, setCoverTable, solutionSetsLabelsV);
     // Check If Home is a vertex of the solution
-    
+    vector<Point_2> V3 = CheckHome(V2);
+    if (TERRAConfig::problemParam.Gp.empty()) {
+        //tspGaUgv
+    }
     return 0;
+}
+
+vector<Point_2> CheckHome(vector<Point_2> &V2) {
+    vector<Point_2> ugvPath;
+    int pos = 0;
+    bool enc = false;
+    for (int i = 0;i < V2.size();++i) {
+        if ((V2[i] - TERRAConfig::problemParam.Home).squared_length() <= eps) {
+            enc = true;
+            pos = i;
+        }
+    }
+    if (enc) {
+        ugvPath = V2;
+        std::swap(ugvPath[pos], ugvPath[0]);//ugvPath[pos]==Home
+    }
+    else {
+        ugvPath.push_back(TERRAConfig::problemParam.Home);
+        ugvPath.insert(ugvPath.end(), V2.begin(), V2.end());
+    }
 }

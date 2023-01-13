@@ -11,6 +11,8 @@
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef Kernel::Point_2 Point_2;
 
+const double eps = 1e-6;
+
 namespace TERRAConfig {
 
     // Configuration of the testing parameters
@@ -29,7 +31,7 @@ namespace TERRAConfig {
         /* data */
     public:
         ConfigParam();
-        ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, char * fullname);
+        ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, const std::string& fullname);
         ~ConfigParam();
     };
 
@@ -49,12 +51,12 @@ namespace TERRAConfig {
         int Delta;//Number of targets per group for the random map generator
         Point_2 Home;//Home location
         double AreaSize;//map area
-        //TODO:Gp
+        std::string Gp;
     private:
         /* data */
     public:
         ProblemParam();
-        ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area);
+        ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area, const std::string& Gp);
         ~ProblemParam();
         int SceneGenerator();
     };
