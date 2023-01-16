@@ -1,9 +1,10 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <time.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <ctime>
 #include <random>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <eigen3/Eigen/Eigen>
 
 #include "Voronoi.h"
 #include "SetCover.h"
@@ -135,6 +136,27 @@ namespace TERRAResult {
         ~PathSolution();
     };
     
+}
+
+namespace Eigen {
+    class Logical {
+    private:
+        Index new_size;
+        Array<Index, Dynamic, 1> old_inds;
+
+    public:
+        Logical(const Array<bool, Dynamic, 1>& keep): new_size(keep.count()), old_inds(new_size) {
+            Index j = 0;
+            for (Index i = 0; i < keep.size(); i++)
+                if (keep(i))
+                    old_inds(j++) = i;
+            old_inds.conservativeResize(j);
+            new_size = j;
+        }
+        Index size() const { return new_size; }
+        Index operator[](Index new_ind) const { return old_inds(new_ind); }
+        bool empty() const { return new_size == 0; }
+    };
 }
 
 //  This function executes the whole solution designed and developed to solve

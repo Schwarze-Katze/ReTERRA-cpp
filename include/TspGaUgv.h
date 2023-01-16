@@ -12,6 +12,13 @@ using Eigen::MatrixXd;
 using Eigen::MatrixXi;
 using Eigen::VectorXd;
 using Eigen::last;
-using Eigen::seq;
+using Eigen::lastN;
+using Eigen::Logical;
 
-int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath);
+int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, VectorXi& rte);
+
+MatrixXi& OX(VectorXi& firstParent, VectorXi& secondParent);
+
+MatrixXi& CX(VectorXi& firstParent, VectorXi& secondParent);
+
+MatrixXi& OBX(VectorXi& firstParent, VectorXi& secondParent);
