@@ -38,4 +38,6 @@ add_executable(ReTERRA
     ${PROJECT_SOURCE_DIR}/src/TERRA.cpp
     ${PROJECT_SOURCE_DIR}/src/Voronoi.cpp
     ${PROJECT_SOURCE_DIR}/src/SetCover.cpp
+    ${PROJECT_SOURCE_DIR}/src/TspGaUgv.cpp
+    ${PROJECT_SOURCE_DIR}/src/UAVComputePath.cpp
 )

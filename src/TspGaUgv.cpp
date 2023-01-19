@@ -20,7 +20,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             dmat(i, j) = (V3[i] - V3[j]).squared_length();
         }
     }
-    dmat = dmat.eval().sqrt();
+    dmat = dmat.eval().cwiseSqrt();
 
     popSize = std::lround(4 * std::ceil(double(popSize) / 4));
     numIter = std::max(1, numIter);
@@ -35,7 +35,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
     double globalMin = INFINITY;
     VectorXd totalDist(popSize);
     MatrixXd distHistory(3, numIter);
-    MatrixXi newPop(elitesMut + elite + popSize, n);
+    MatrixXi newPop(int(elitesMut + elite + popSize), n);
     VectorXi optRoute;
     int newPopCnt = 0;
     for (int iter = 1;iter < numIter;++iter) {
@@ -100,10 +100,12 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
                 std::swap(tmpPop(0, I), tmpPop(0, J));
                 break;
             case 3://slide
+            {
                 auto tmpCell = tmpPop(0, I);
                 tmpPop(0, seq(I, J - 1)) = tmpPop(0, seq(I + 1, J));
                 tmpPop(0, J) = tmpCell;
                 break;
+            }
             default:
                 break;
             }
@@ -150,18 +152,18 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             switch (crossOp)
             {
             case 1://Order Crossover
-                tmpPop = OX(firstParent, secondParent);
+                OX(tmpPop, firstParent, secondParent);
                 --restPop;
                 break;
             case 2://Cycle Crossover
-                tmpPop = CX(firstParent, secondParent);
+                CX(tmpPop, firstParent, secondParent);
                 restPop -= 2;
                 if (restPop < 0) {
                     tmpPop.conservativeResize(1, NoChange);
                 }
                 break;
             case 3://Order Base Crossover
-                tmpPop = OBX(firstParent, secondParent);
+                OBX(tmpPop, firstParent, secondParent);
                 --restPop;
                 break;
             default:
@@ -191,12 +193,13 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
     for (auto tmpRte : rte) {
         UGVPath.push_back(V3[tmpRte]);
     }
+    return 0;
 }
 
-MatrixXi& OX(VectorXi& p1, VectorXi& p2) {
+MatrixXi& OX(MatrixXi& child,VectorXi& p1, VectorXi& p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
-    MatrixXi child(Eigen::fix<1>, c1);
+    child.resize(Eigen::fix<1>, c1);
     child.fill(-1);
     int randIdx1 = rand() % c1;
     int randIdx2 = rand() % c1;
@@ -222,25 +225,25 @@ MatrixXi& OX(VectorXi& p1, VectorXi& p2) {
     return child;
 }
 
-MatrixXi& CX(VectorXi& p1, VectorXi& p2) {
+MatrixXi& CX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
-    MatrixXi child(Eigen::fix<2>, c1);
+    child.resize(Eigen::fix<2>, c1);
     MatrixXi totalCycles(0, c1);
     bool isCompleted = false;
     while (!isCompleted) {
-        MatrixXi cycle(Eigen::fix<2>, c1);
+        MatrixXi cycle(2, c1);
         cycle.fill(-1);
         //Find first element of the new parent
         int r = 0;
         while (p1(r) == -1) {
             ++r;
         }
-        auto findCycle = [&](auto&& self, int curVal, int initVal) {
+        auto findCycle = [&](auto&& self, int curVal, int initVal)->MatrixXi {
             Logical idx(p1.array() == curVal);
-            cycle(0, idx) = curVal;
+            cycle(0, idx[0]) = curVal;
             curVal = p2(idx[0]);
-            cycle(1, idx) = curVal;
+            cycle(1, idx[0]) = curVal;
             int t = cycle.cols();
             if (t == 1) {
                 initVal = cycle(0, idx[0]);
@@ -298,10 +301,10 @@ MatrixXi& CX(VectorXi& p1, VectorXi& p2) {
     return child;
 }
 
-MatrixXi& OBX(VectorXi& p1, VectorXi& p2) {
+MatrixXi& OBX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
-    MatrixXi child(Eigen::fix<1>, c1);
+    child.resize(Eigen::fix<1>, c1);
     child.fill(-1);
     //Step 1: Random indexs
     int set = rand() % c1;
@@ -326,4 +329,5 @@ MatrixXi& OBX(VectorXi& p1, VectorXi& p2) {
             }
         }
     }
+    return child;
 }

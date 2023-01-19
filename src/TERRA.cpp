@@ -1,5 +1,7 @@
 #include "TERRA.h"
 
+vector<Point_2> CheckHome(vector<Point_2>& V2);
+
 namespace TERRAConfig {
     
     ConfigParam::ConfigParam() { }
@@ -110,7 +112,12 @@ int TERRA() {
     // Check If Home is a vertex of the solution
     vector<Point_2> V3 = CheckHome(V2);
     if (TERRAConfig::problemParam.Gp.empty()) {
-        //tspGaUgv
+        double minDist;
+        std::vector<Point_2> UGVPath;
+        Eigen::VectorXi rte;
+        tspGaUgv(V3, minDist, UGVPath, rte);
+        double UGVTime = minDist / TERRAConfig::ugvData.Vugv;
+        //ugvComputePath
     }
     return 0;
 }
@@ -133,4 +140,5 @@ vector<Point_2> CheckHome(vector<Point_2> &V2) {
         ugvPath.push_back(TERRAConfig::problemParam.Home);
         ugvPath.insert(ugvPath.end(), V2.begin(), V2.end());
     }
+    return ugvPath;
 }

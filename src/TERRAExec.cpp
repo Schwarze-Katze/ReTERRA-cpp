@@ -1,11 +1,11 @@
-#include "TERRA.h"
+#include "TERRAUtility.h"
 
 inline int initTERRAParam();
 inline int TERRALaunch();
 
 namespace TERRAConfig{
     ConfigParam configParam = ConfigParam(1, true, true, false, "placeholder");
-    ProblemParam problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200);
+    ProblemParam problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200,"");
     UGVData ugvData = UGVData(0.4, 430, 9, 2, 0.06, 1, 2.7);
     UAVData uavData = UAVData(308, 0.5, 4, 4);
 }
@@ -19,7 +19,7 @@ int main() {
 
 inline int initTERRAParam() {
     // using namespace TERRAConfig;
-    TERRAConfig::configParam;
+    
     return 0;
 }
 

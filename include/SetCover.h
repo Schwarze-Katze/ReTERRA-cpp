@@ -1,14 +1,10 @@
 #pragma once
 #include <iostream>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <eigen3/Eigen/Eigen>
-#include "TERRA.h"
+#include "TERRAUtility.h"
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef Kernel::Point_2 Point_2;
 
 using std::vector;
-using Eigen::Matrix;
+using Eigen::MatrixXd;
 using Eigen::Dynamic;
 using Eigen::all;
 using Eigen::last;
@@ -18,6 +14,12 @@ using Eigen::VectorXi;
 using Eigen::seq;
 
 
-int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV);
+int GreedySetCovering(//2 input
+    std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, 
+    //3 output
+    std::vector<Point_2>& V2, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV);
 
-inline int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL, MatrixXi& solutionA, VectorXi& solutionSetsLabelsV);
+inline int SetCoveringProblem(//4 input
+    MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL,
+    //2 output
+    MatrixXi& solutionA, VectorXi& solutionSetsLabelsV);

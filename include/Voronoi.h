@@ -1,16 +1,16 @@
 #pragma once
 #include <iostream>
 // includes for defining the Voronoi diagram adaptor
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Voronoi_diagram_2.h>
 #include <CGAL/Delaunay_triangulation_adaptation_policies_2.h>
 #include <CGAL/Delaunay_triangulation_adaptation_traits_2.h>
 //includes definition of TERRAConfig
-#include "TERRA.h"
+#include "TERRAUtility.h"
 
 // typedefs for defining the adaptor
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Simple_cartesian<double> K;
 typedef CGAL::Delaunay_triangulation_2<K> DT;
 typedef CGAL::Delaunay_triangulation_adaptation_traits_2<DT> AT;
 typedef CGAL::Delaunay_triangulation_caching_degeneracy_removal_policy_2<DT> AP;
@@ -26,7 +26,9 @@ typedef VD::Halfedge_handle Halfedge_handle;
 typedef VD::Ccb_halfedge_circulator Ccb_halfedge_circulator;
 
 
-int VoronoiCoveringTimeOptimize(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget);
+int VoronoiCoveringTimeOptimize(//No input
+    //2 output
+    std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget);
 
 bool isDuplicated(std::vector<Point_2> const, std::vector<Point_2> const);
 
