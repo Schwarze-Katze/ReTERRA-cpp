@@ -1,6 +1,6 @@
 #include "UAVComputePath.h"
 
-int UAVComputePath(vector<Point_2>& coveredTarget, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV, vector<Point_2>& V1, std::vector<Point_2>& UGVPath, vector<vector<Point_2>>& uavPath1, vector<vector<Point_2>>& uavPath2, double& distance, double& time, int& stops) {
+int UAVComputePath(vector<Point_2>& coveredTarget, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV, vector<Point_2>& V1, std::vector<Point_2>& UGVPath, vector<vector<Point_2>>& uavPath1, vector<vector<Point_2>>& uavPath2, double& distance, int& time, int& stops) {
     vector<bool> isCoveredTargetReached(coveredTarget.size(), false);
     time = 0;
     distance = 0;
@@ -17,8 +17,8 @@ int UAVComputePath(vector<Point_2>& coveredTarget, MatrixXi& setCoverTable, Vect
                 }
                 //TIME BASED SEARCHING
                 VectorXi rteT;
-                double dis, t;
-                int stop;
+                double dis;
+                int stop, t;
                 //SearchUAVOperations(subPath, rteT, dis, t, stop);
                 time += t;
                 distance += dis;

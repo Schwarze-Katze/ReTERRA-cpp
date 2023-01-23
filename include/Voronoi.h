@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 // includes for defining the Voronoi diagram adaptor
-#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Voronoi_diagram_2.h>
 #include <CGAL/Delaunay_triangulation_adaptation_policies_2.h>

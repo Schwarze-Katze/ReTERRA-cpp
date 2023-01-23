@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 project(reTERRA-cpp)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_CXX_COMPILER:FILEPATH C:/msys64/mingw64/bin/g++.exe)
+set(CMAKE_C_COMPILER:FILEPATH C:/msys64/mingw64/bin/gcc.exe)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 #This project requires CGAL
 find_package(CGAL REQUIRED QUIET OPTIONAL_COMPONENTS Core)
@@ -40,4 +44,5 @@ add_executable(ReTERRA
     ${PROJECT_SOURCE_DIR}/src/SetCover.cpp
     ${PROJECT_SOURCE_DIR}/src/TspGaUgv.cpp
     ${PROJECT_SOURCE_DIR}/src/UAVComputePath.cpp
+    ${PROJECT_SOURCE_DIR}/src/SearchUAVOperations.cpp
 )
