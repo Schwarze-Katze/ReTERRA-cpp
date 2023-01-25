@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.1)
+project(lkhUtils)
+include_directories(${PROJECT_SOURCE_DIR}/INCLUDE)
+file(GLOB LKHSRC "${PROJECT_SOURCE_DIR}/*.c")
+add_library(${PROJECT_NAME} STATIC ${LKHSRC})
