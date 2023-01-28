@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include <eigen3/Eigen/Eigen>
+#include <Eigen/Eigen>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 

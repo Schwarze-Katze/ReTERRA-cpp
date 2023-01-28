@@ -117,7 +117,11 @@ int TERRA() {
         Eigen::VectorXi rte;
         tspGaUgv(V3, minDist, UGVPath, rte);
         double UGVTime = minDist / TERRAConfig::ugvData.Vugv;
-        //ugvComputePath
+        std::vector<std::vector<Point_2>> uavPath1, uavPath2;
+        double uavDistance, uavTime;
+        int uavStop;
+        UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, V1, UGVPath, uavPath1, uavPath2, uavDistance, uavTime, uavStop);
+        
     }
     return 0;
 }

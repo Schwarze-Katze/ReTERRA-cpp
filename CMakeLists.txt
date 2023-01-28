@@ -7,7 +7,6 @@ set(CMAKE_CXX_COMPILER:FILEPATH C:/msys64/mingw64/bin/g++.exe)
 set(CMAKE_C_COMPILER:FILEPATH C:/msys64/mingw64/bin/gcc.exe)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_subdirectory(lkhUtils)
 
 #This project requires CGAL
 find_package(CGAL REQUIRED QUIET OPTIONAL_COMPONENTS Core)
@@ -26,21 +25,27 @@ if ( NOT Boost_FOUND )
 endif()
 
 #This project requires Eigen
-find_package( Eigen3 REQUIRED 3.4.0)
-if ( NOT Eigen3_FOUND )
+find_package( Eigen3 3.4.0 REQUIRED NO_MODULE)
+if ( NOT EIGEN3_FOUND )
   message(STATUS "This project requires the Eigen library, and will not be compiled.")
   return()
 endif()
-include_directories(${EIGEN3_INCLUDE_DIRS})
+include_directories(${Eigen3_INCLUDE_DIRS})
+message(STATUS "Found Eigen3 include dir:" ${EIGEN3_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)
 if ( NOT OpenCV_FOUND )
   message(STATUS "This project requires the OpenCV library, and will not be compiled.")
   return()
 endif()
-include_directories(${OPENCV_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS "Found OpenCV include dir:" ${OpenCV_INCLUDE_DIRS})
+message(STATUS "Found OpenCV lib:" ${OpenCV_LIBS})
 
+# Add this line if liblkhUtils.a is missing or broken
+# add_subdirectory(lkhUtils lkhUtils/OBJ)
 
+link_directories(${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
@@ -54,9 +59,10 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/TspGaUgv.cpp
     ${PROJECT_SOURCE_DIR}/src/UAVComputePath.cpp
     ${PROJECT_SOURCE_DIR}/src/SearchUAVOperations.cpp
+    ${PROJECT_SOURCE_DIR}/src/TSP.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} lkhUtils)
 target_link_libraries(${PROJECT_NAME} ${CGAL_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${EIGEN3_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${OPENCV_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})

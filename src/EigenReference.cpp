@@ -1,7 +1,7 @@
 // A simple quickref for Eigen. Add anything that's missing.
 // Main author: Keir Mierle
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 using namespace Eigen;
 int main() { 
 Matrix<double, 3, 3> A;               // Fixed rows and cols. Same as Matrix3d.

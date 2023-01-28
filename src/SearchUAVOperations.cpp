@@ -1,6 +1,6 @@
 #include "SearchUAVOperations.h"
 
-int SearchUAVOperations(vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop) {
+int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop) {
     Point_2 home = path.at(0);
     int stops = 0;
     auto N = path.size();
@@ -46,7 +46,10 @@ int SearchUAVOperations(vector<Point_2>& path, VectorXi& rte, double& dist, doub
     if (solFound) {
         deque<int> tmpRte(rte.begin(), rte.end());
         ReconstructPath(currentNode, path, tmpRte, dist);
-        rte = Eigen::Map<VectorXi>(&tmpRte[0], tmpRte.size());//CANNOT DO THIS
+        rte.resize(tmpRte.size());
+        for (int i = 0;i < tmpRte.size();++i) {
+            rte(i) = tmpRte[i];
+        }
         for (int i = 1;i < rte.size() - 1;++i) {
             if (rte(i) == 1) {
                 stops++;
@@ -59,6 +62,10 @@ int SearchUAVOperations(vector<Point_2>& path, VectorXi& rte, double& dist, doub
     }
     return 0;
 }
+
+Vertex::Vertex() { }
+
+Vertex::~Vertex() { }
 
 Vertex::Vertex(const Vertex* _parent, Point_2& _p, double _t, int _g, double _h, double _f, int _r):parent(_parent), p(_p), t(_t), g(_g), h(_h), f(_f), r(_r) { }
 
@@ -175,6 +182,18 @@ inline bool isSamePoint(const Point_2& p1, const Point_2& p2) {
     return (p1 - p2).squared_length() < eps;
 }
 
+inline double getDistance(const Point_2& p1, const Point_2& p2) {
+    return sqrt((p1 - p2).squared_length());
+}
+
+inline double getDistance(double x1, double y1, double x2, double y2) {
+    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+
+inline double getTime(double dis) {
+    return round(dis / uavData.Vuav);
+}
+
 vector<Vertex> ExpandGraph(const Vertex& currentNode, const vector<Point_2>& path, const Vertex& vertexNode) {
     vector<Vertex> L;
     bool isRel = true;
@@ -280,7 +299,25 @@ void ReconstructPath(const Vertex& currentNode, const vector<Point_2>& path, deq
     
     for (int i = 0;i < path.size();++i) {
         if (isSamePoint(path[i], currentNode.p)) {
-            
+            rte.push_front(i);
+            if (currentNode.parent != nullptr) {
+                dist += getDistance(currentNode.p, currentNode.parent->p);
+                ReconstructPath(*currentNode.parent, path, rte, dist);
+                break;
+            }
         }
     }
+}
+
+bool isInPath(const Vertex* cur, const Point_2& suc) {
+    if (cur != nullptr) {
+        if (isSamePoint(cur->p, suc)) {
+            return true;
+        }
+        else {
+            return isInPath(cur->parent, suc);
+        }
+    }
+    else
+        return false;
 }

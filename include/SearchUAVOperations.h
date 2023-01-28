@@ -1,10 +1,13 @@
 #pragma once
+#include <Eigen/Eigen>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 #include "TERRAUtility.h"
 
 using std::vector;
 using std::deque;
+using std::string;
+using std::fstream;
 using Eigen::MatrixXd;
 using Eigen::MatrixXi;
 using Eigen::VectorXd;
@@ -30,7 +33,7 @@ public:
     double y();
 };
 
-int SearchUAVOperations();
+int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop);
 double ComputeH_LKH2(const vector<Point_2>& path, const Vertex& vertexNode);
 Vertex FindLowest(vector<Vertex>& OPEN);
 void DeleteNode(vector<Vertex>& OPEN);
@@ -42,7 +45,10 @@ void UpdateVertex(vector<Vertex>& OPEN, const Vertex& currentNode, const Vertex&
 void ReconstructPath(const Vertex& currentNode, const vector<Point_2>& path, deque<int>& rte, double& dist);
 bool isInPath(const Vertex* cur, const Point_2& suc);
 bool isSamePoint(const Point_2& p1, const Point_2& p2);
-double getDistance(const Point_2& p1, const Point_2& p2);
-double getDistance(double x1, double y1, double x2, double y2);
-double getTime(double dis);
-VectorXi LKH_TSP(const MatrixXd& costMatrix, double CostMatrixMulFactor, const std::string& fileName);
+inline double getDistance(const Point_2& p1, const Point_2& p2);
+inline double getDistance(double x1, double y1, double x2, double y2);
+inline double getTime(double dis);
+
+
+VectorXi LKH_TSP(const MatrixXd& costMatrix, double costMatrixMulFactor, const std::string& fileName);
+void WriteTSPLibFile(const string& fileName, const MatrixXd& costMatrix);

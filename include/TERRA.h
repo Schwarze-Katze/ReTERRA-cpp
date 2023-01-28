@@ -6,5 +6,6 @@
 #include "Voronoi.h"
 #include "SetCover.h"
 #include "TspGaUgv.h"
+#include "UAVComputePath.h"
 
 using std::vector;

@@ -8,4 +8,5 @@ using Eigen::VectorXd;
 using Eigen::VectorXi;
 using std::vector;
 
-int UAVComputePath(vector<Point_2>& coveredTarget, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV, vector<Point_2>& V1, vector<Point_2>& UGVPath, vector<vector<Point_2>>& uavPath1, vector<vector<Point_2>>& uavPath2, double& uav_distance, double& uav_time, int& stops);
+int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCoverTable, const VectorXi& solutionSetsLabelsV, const vector<Point_2>& V1, const vector<Point_2>& UGVPath, vector<vector<Point_2>>& uavPath1, vector<vector<Point_2>>& uavPath2, double& distance, double& time, int& stops);
+int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop);

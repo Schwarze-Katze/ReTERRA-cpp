@@ -6,7 +6,7 @@
  * This file contains the main function of the program.
  */
 
-int LKHmain(char *argv)
+int LKHmain(const char *argv)
 {
     GainType Cost, OldOptimum;
     double Time, LastTime;
