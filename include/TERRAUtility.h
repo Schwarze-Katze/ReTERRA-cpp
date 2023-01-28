@@ -116,16 +116,29 @@ namespace TERRAConfig {
 namespace TERRAResult {
     class DataSolution
     {
+    public:
+        double ugvDist;
+        double ugvTime;
+        double uavDist;
+        double uavTime;
+        double totalDist;
+        double totalTime;
+        int stop;
     private:
         /* data */
     public:
         DataSolution(/* args */);
+        //DataSolution(double ugvDist, double ugvTime, double uavDist, double uavTime, double totalDist, double totalTime, int stop);
         ~DataSolution();
     };
     
 
     class PathSolution
     {
+    public:
+        Point_2 ugv;
+        std::vector<Point_2> uav1;
+        std::vector<Point_2> uav2;
     private:
         /* data */
     public:
@@ -135,6 +148,10 @@ namespace TERRAResult {
     
 }
 
+namespace TERRAResult{
+    extern DataSolution dataSol;
+    extern std::vector<PathSolution> pathSol;
+}
 namespace Eigen {
     class Logical {
     private:

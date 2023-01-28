@@ -60,6 +60,7 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/UAVComputePath.cpp
     ${PROJECT_SOURCE_DIR}/src/SearchUAVOperations.cpp
     ${PROJECT_SOURCE_DIR}/src/TSP.cpp
+    ${PROJECT_SOURCE_DIR}/src/BuildSolution.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} lkhUtils)

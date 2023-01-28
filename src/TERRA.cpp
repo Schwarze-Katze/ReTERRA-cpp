@@ -1,6 +1,6 @@
 #include "TERRA.h"
 
-vector<Point_2> CheckHome(vector<Point_2>& V2);
+
 
 namespace TERRAConfig {
     
@@ -112,17 +112,28 @@ int TERRA() {
     // Check If Home is a vertex of the solution
     vector<Point_2> V3 = CheckHome(V2);
     if (TERRAConfig::problemParam.Gp.empty()) {
-        double minDist;
-        std::vector<Point_2> UGVPath;
+        //UGV's Path without Gp
+        double ugvDist;
+        std::vector<Point_2> ugvPath;
         Eigen::VectorXi rte;
-        tspGaUgv(V3, minDist, UGVPath, rte);
-        double UGVTime = minDist / TERRAConfig::ugvData.Vugv;
+        tspGaUgv(V3, ugvDist, ugvPath, rte);
+        double ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
+
+        //UAV's Path without Gp
         std::vector<std::vector<Point_2>> uavPath1, uavPath2;
-        double uavDistance, uavTime;
+        double uavDist, uavTime;
         int uavStop;
-        UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, V1, UGVPath, uavPath1, uavPath2, uavDistance, uavTime, uavStop);
+        UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, V1, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);
+        
+        //1st Solution without GOA
+        auto totalTime = uavTime + ugvTime;
+        auto totalDist = uavDist + ugvDist;
         
     }
+    else {
+        //TODO:Support Gravitational Optimization
+    }
+    //TODO:visualisation
     return 0;
 }
 
