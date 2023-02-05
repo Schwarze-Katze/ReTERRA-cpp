@@ -128,10 +128,44 @@ int TERRA() {
         //1st Solution without GOA
         auto totalTime = uavTime + ugvTime;
         auto totalDist = uavDist + ugvDist;
-        
+        TERRAResult::dataSol = TERRAResult::DataSolution(ugvDist, ugvTime, uavDist, uavTime, totalDist, totalTime, uavStop);
+        BuildSolution(ugvPath, uavPath1, uavPath2);
     }
     else {
-        //TODO:Support Gravitational Optimization
+        Point_2 avg;
+        MatrixXd V3Mat(2, V3.size());
+        for (int i=0;i<V3.size();++i) {
+            V3Mat(0, i) = V3[i].x();
+            V3Mat(1, i) = V3[i].y();
+        }
+        if (TERRAConfig::problemParam.Gp == "GravityCenter") {
+            avg = { V3Mat.row(0).mean(), V3Mat.row(1).mean() };
+        }
+        else if (TERRAConfig::problemParam.Gp == "HomeCenter"){
+            avg = TERRAConfig::problemParam.Home;
+        }
+        else if (TERRAConfig::problemParam.Gp == "MedianCenter"){
+            avg = { Eigen::median(V3Mat.row(0)), Eigen::median(V3Mat.row(1)) };
+        }
+        std::vector<Point_2> VOpt, VRes;
+        //GravitationalOptimization(V1,avg,coveredTarget,solutionSetsLabelsV,setCoverTable,VOpt,VRes);
+        //Genetic Algorithm to UGV Path
+        //VOpt.push_front(Home)
+        double ugvDist;
+        std::vector<Point_2> ugvPath;
+        Eigen::VectorXi rte;
+        tspGaUgv(VOpt, ugvDist, ugvPath, rte);
+        double ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
+        //Search Algorithm to UAV Path
+        std::vector<std::vector<Point_2>> uavPath1, uavPath2;
+        double uavDist, uavTime;
+        int uavStop;
+        UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, VRes, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);
+        //i'st Solution
+        auto totalTime = uavTime + ugvTime;
+        auto totalDist = uavDist + ugvDist;
+        TERRAResult::dataSol = TERRAResult::DataSolution(ugvDist, ugvTime, uavDist, uavTime, totalDist, totalTime, uavStop);
+        BuildSolution(ugvPath, uavPath1, uavPath2);
     }
     //TODO:visualisation
     return 0;

@@ -128,7 +128,7 @@ namespace TERRAResult {
         /* data */
     public:
         DataSolution(/* args */);
-        //DataSolution(double ugvDist, double ugvTime, double uavDist, double uavTime, double totalDist, double totalTime, int stop);
+        DataSolution(double ugvDist, double ugvTime, double uavDist, double uavTime, double totalDist, double totalTime, int stop);
         ~DataSolution();
     };
     
@@ -171,6 +171,21 @@ namespace Eigen {
         Index operator[](Index new_ind) const { return old_inds(new_ind); }
         bool empty() const { return new_size == 0; }
     };
+
+    template<typename Derived>
+    typename Derived::Scalar median(Eigen::DenseBase<Derived>& d) {
+        auto r{ d.reshaped() };
+        std::sort(r.begin(), r.end());
+        return r.size() % 2 == 0 ?
+            r.segment((r.size() - 2) / 2, 2).mean() :
+            r(r.size() / 2);
+    }
+
+    template<typename Derived>
+    typename Derived::Scalar median(const Eigen::DenseBase<Derived>& d) {
+        typename Derived::PlainObject m{ d.replicate(1,1) };
+        return median(m);
+    }
 }
 
 //  This function executes the whole solution designed and developed to solve

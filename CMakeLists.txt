@@ -61,6 +61,7 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/SearchUAVOperations.cpp
     ${PROJECT_SOURCE_DIR}/src/TSP.cpp
     ${PROJECT_SOURCE_DIR}/src/BuildSolution.cpp
+    ${PROJECT_SOURCE_DIR}/src/GravitationalOptimization.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} lkhUtils)
