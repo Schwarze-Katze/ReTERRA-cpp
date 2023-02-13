@@ -56,7 +56,8 @@ namespace TERRAConfig {
         ProblemParam();
         ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area, const std::string& Gp);
         ~ProblemParam();
-        int SceneGenerator();
+        int SceneGenerator(const std::string& fileName);
+        int ReadScene(const std::string& fileName);
     };
     
     // UGV Path Planning (GA) Parameters

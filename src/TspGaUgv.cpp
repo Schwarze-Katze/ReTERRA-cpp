@@ -21,7 +21,8 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
         }
     }
     dmat = dmat.eval().cwiseSqrt();
-
+    // std::cout << "--dmat: " << dmat.rows() << ", " << dmat.cols() << std::endl;
+    // std::cout << dmat << std::endl;
     popSize = std::lround(4 * std::ceil(double(popSize) / 4));
     numIter = std::max(1, numIter);
     
@@ -38,7 +39,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
     MatrixXi newPop(int(elitesMut + elite + popSize), n);
     VectorXi optRoute;
     int newPopCnt = 0;
-    for (int iter = 1;iter < numIter;++iter) {
+    for (int iter = 0;iter < numIter;++iter) {
         newPopCnt = 0;
         //Evaluate Each Population Member (Calculate Total Distance)
         for (int p = 0;p < popSize;++p) {
@@ -58,14 +59,14 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
         int minIndex;
         minDist = totalDist.minCoeff(&minIndex);
         
-        distHistory(1, iter) = minDist;
+        distHistory(0, iter) = minDist;
         if (minDist < globalMin) {
             globalMin = minDist;
             optRoute = pop(minIndex, all);
         }
-        distHistory(2, iter) = totalDist.mean();
+        distHistory(1, iter) = totalDist.mean();
         auto maxDist = totalDist.maxCoeff();
-        distHistory(3, iter) = maxDist;
+        distHistory(2, iter) = maxDist;
         //Only for demonstrating to a reviewer an issue
         if (iter > 40) {
             elitesMut = 0;
@@ -76,10 +77,10 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             Eigen::ArrayXd dRandIdx(tournaments);
             dRandIdx.setRandom();
             dRandIdx = dRandIdx.eval().abs() * (popSize - 1);
-            VectorXi randIdx = dRandIdx.cast<int>() + 1;
+            VectorXi randIdx = dRandIdx.cast<int>();
             // randIdx = randIdx.eval().unaryExpr<double(*)(double)>(&std::ceil);
-            VectorXi rtes = pop(randIdx(seq(0, tournaments)), all);
-            VectorXd dists = totalDist(randIdx(seq(0, tournaments)));
+            MatrixXi rtes = pop(randIdx, all);
+            VectorXd dists = totalDist(randIdx);
             int minDistIdx;
             dists.minCoeff(&minDistIdx);
             VectorXi best = rtes(minDistIdx, all);
@@ -90,20 +91,20 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             if (I > J) {
                 std::swap(I, J);
             }
-            tmpPop(0, all) = best;
+            tmpPop = best;
             switch (mutOp)
             {
             case 1://flip
-                tmpPop(0, seq(I, J)) = tmpPop(0, seq(J, I, -1)).eval();
+                tmpPop(seq(I, J)) = tmpPop(seq(J, I, -1)).eval();
                 break;
             case 2://swap
-                std::swap(tmpPop(0, I), tmpPop(0, J));
+                std::swap(tmpPop(I), tmpPop(J));
                 break;
             case 3://slide
             {
-                auto tmpCell = tmpPop(0, I);
-                tmpPop(0, seq(I, J - 1)) = tmpPop(0, seq(I + 1, J));
-                tmpPop(0, J) = tmpCell;
+                auto tmpCell = tmpPop(I);
+                tmpPop(seq(I, J - 1)) = tmpPop(seq(I + 1, J));
+                tmpPop(J) = tmpCell;
                 break;
             }
             default:
@@ -114,8 +115,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
         }
         int restPop = 0;
         if (elitesMut > 0) {
-            int rest = newPopCnt;
-            int restPop = popSize - rest;
+            restPop = popSize - newPopCnt;
         }
         else {//elitesMut==0
             restPop = popSize;
@@ -145,7 +145,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             int idx = 0;
             dists.minCoeff(&idx);
             firstParent = rtes(idx, all);
-            dists(0, idx) = INFINITY;
+            dists(idx) = INFINITY;
             dists.minCoeff(&idx);
             secondParent = rtes(idx, all);
 
@@ -169,7 +169,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
             default:
                 break;
             }
-            for (int i = 0;i < tmpPop.cols();++i) {
+            for (int i = 0;i < tmpPop.rows();++i) {
                 newPop(newPopCnt, all) = tmpPop(i, all);
                 ++newPopCnt;
             }
@@ -188,7 +188,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
     }//rte = circshift(optRoute,cycles);
     if (lastDepot == 1) {
         rte.conservativeResize(optRoute.size() + 1);
-        rte(optRoute.size()) = 1;
+        rte(optRoute.size()) = 0;
     }
     for (auto tmpRte : rte) {
         UGVPath.push_back(V3[tmpRte]);
@@ -196,7 +196,7 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
     return 0;
 }
 
-MatrixXi& OX(MatrixXi& child,VectorXi& p1, VectorXi& p2) {
+int OX(MatrixXi& child, const VectorXi& p1, const VectorXi& p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
     child.resize(Eigen::fix<1>, c1);
@@ -211,7 +211,7 @@ MatrixXi& OX(MatrixXi& child,VectorXi& p1, VectorXi& p2) {
     }
     child(0, seq(randIdx1, randIdx2)) = p1(seq(randIdx1, randIdx2));
     for (int i = 0;i < c2;++i) {
-        Eigen::Logical k(child.array() == p2(i));
+        Eigen::Logical k(child(0, all).array() == p2(i));
         if (k.empty()) {
             int pos = 0;
             for (int j = 0;pos == 0;++j) {
@@ -222,10 +222,10 @@ MatrixXi& OX(MatrixXi& child,VectorXi& p1, VectorXi& p2) {
             child(0, pos) = p2(i);
         }
     }
-    return child;
+    return 0;
 }
 
-MatrixXi& CX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
+int CX(MatrixXi& child, VectorXi p1, VectorXi p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
     child.resize(Eigen::fix<2>, c1);
@@ -255,7 +255,7 @@ MatrixXi& CX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
             }
             return cycle;
         };
-        cycle = findCycle(findCycle, p1(0, r), p1(0, r));
+        cycle = findCycle(findCycle, p1(r), p1(r));
         std::vector<int> newP1, newP2;
         for (int i = 0;i < c1;++i) {
             auto idx(cycle.row(0).array() == p1(i));
@@ -298,10 +298,10 @@ MatrixXi& CX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
         }
         ++c;
     }
-    return child;
+    return 0;
 }
 
-MatrixXi& OBX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
+int OBX(MatrixXi& child, const VectorXi& p1, const VectorXi& p2) {
     const int c1 = p1.size();
     const int c2 = p2.size();
     child.resize(Eigen::fix<1>, c1);
@@ -329,5 +329,5 @@ MatrixXi& OBX(MatrixXi& child, VectorXi& p1, VectorXi& p2) {
             }
         }
     }
-    return child;
+    return 0;
 }

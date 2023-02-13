@@ -21,11 +21,8 @@ int tspGaUgv(//1 input
     //3 output
     double& minDist, vector<Point_2>& UGVPath, VectorXi& rte);
 
-MatrixXi& OX(//1 output
-    MatrixXi& child, 
-    //2 input
-    VectorXi& firstParent, VectorXi& secondParent);
+int OX(MatrixXi& child, const VectorXi& p1, const VectorXi& p2);
 
-MatrixXi& CX(MatrixXi& child, VectorXi& firstParent, VectorXi& secondParent);
+int CX(MatrixXi& child, VectorXi p1, VectorXi p2);
 
-MatrixXi& OBX(MatrixXi& child, VectorXi& firstParent, VectorXi& secondParent);
+int OBX(MatrixXi& child, const VectorXi& p1, const VectorXi& p2);

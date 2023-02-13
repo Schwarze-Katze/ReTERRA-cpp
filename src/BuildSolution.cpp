@@ -20,3 +20,7 @@ int BuildSolution(const vector<Point_2>& ugvPath, const std::vector<std::vector<
     }
     return 0;
 }
+
+inline bool isSamePoint(const Point_2& p1, const Point_2& p2) {
+    return (p1 - p2).squared_length() < eps;
+}

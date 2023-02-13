@@ -2,10 +2,13 @@ cmake_minimum_required(VERSION 3.1)
 project(reTERRA)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_COMPILER:FILEPATH C:/msys64/mingw64/bin/g++.exe)
 set(CMAKE_C_COMPILER:FILEPATH C:/msys64/mingw64/bin/gcc.exe)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXE_LINKER_FLAGS " -static")
+
+add_definitions(-D_RES_DIR="${PROJECT_SOURCE_DIR}/src/")#Pregenerated test scene file location
 
 
 #This project requires CGAL
@@ -43,9 +46,9 @@ message(STATUS "Found OpenCV include dir:" ${OpenCV_INCLUDE_DIRS})
 message(STATUS "Found OpenCV lib:" ${OpenCV_LIBS})
 
 # Add this line if liblkhUtils.a is missing or broken
-# add_subdirectory(lkhUtils lkhUtils/OBJ)
+add_subdirectory(lkhUtils ${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
 
-link_directories(${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
+#link_directories(${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
@@ -64,6 +67,8 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/src/GravitationalOptimization.cpp
 )
 
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_START_STATIC ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_END_STATIC ON)
 target_link_libraries(${PROJECT_NAME} lkhUtils)
 target_link_libraries(${PROJECT_NAME} ${CGAL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)

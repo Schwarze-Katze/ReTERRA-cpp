@@ -28,6 +28,7 @@
 VectorXi LKH_TSP(const MatrixXd& costMatrix, double costMatrixMulFactor, const string& fileName) {
     MatrixXd costMatrix4Tsp = costMatrixMulFactor * costMatrix;
     costMatrix4Tsp.unaryExpr<double(*)(double)>(&floor);
+    WriteTSPLibFile(fileName, costMatrix4Tsp);
     LKHmain((fileName + ".par").c_str());
     return ReadSolution((fileName + ".txt").c_str());
 }
@@ -52,7 +53,7 @@ void WriteTSPLibFile(const string& fileName, const MatrixXd& costMatrix) {
     
     fstream fParam, fTsp;
     fParam.open((fileName + ".tsp").c_str(), std::ios::out | std::ios::trunc);
-    fParam << name << type << comment << dimension << edgeWeightTime << edgeWeightFormat << edgeWeightSection << costMatrixStr << eof_;
+    fParam << name << comment << type << dimension << edgeWeightTime << edgeWeightFormat << edgeWeightSection << costMatrixStr << eof_;
     fParam.close();
 
     string problemFile = "PROBLEM_FILE = " + fileName + ".tsp\n";
@@ -63,7 +64,7 @@ void WriteTSPLibFile(const string& fileName, const MatrixXd& costMatrix) {
     string runs = "RUNS = 1\n";
     string tourFile = "TOUR_FILE = " + fileName + ".txt\n";
     fTsp.open((fileName + ".par").c_str(), std::ios::out | std::ios::trunc);
-    fTsp << problemFile << optimum << moveType << patchingC << patchingC << runs << tourFile;
+    fTsp << problemFile << optimum << moveType << patchingC << patchingA << runs << tourFile;
     fTsp.close();
     return;
 }

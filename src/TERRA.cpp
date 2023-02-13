@@ -1,4 +1,5 @@
 #include "TERRA.h"
+#include "TERRAUtility.h"
 
 
 
@@ -45,9 +46,7 @@ namespace TERRAConfig {
     // delta = 2
     // Solution : This algorithm will create 6 groups of 2 target points inside a
     // r = 3 km of radius in a 50km2 area
-    int ProblemParam::SceneGenerator() {
-        //CGAL::Random rng;
-
+    int ProblemParam::SceneGenerator(const std::string& fileName) {
         std::random_device realRng;
         std::mt19937 rng(realRng());
 
@@ -61,7 +60,7 @@ namespace TERRAConfig {
                 Point_2 g(AreaSize * uniformRng(rng), AreaSize * uniformRng(rng));
                 groups.push_back(g);
 
-                double sigma = 1.5 * uniformRng(rng) + 0.5;
+                double sigma = 1.5 * uniformRng(rng) + 0.5;//0.5-2
                 sigma *= Radius;
                 std::normal_distribution<double> normalRng(0, sigma);
                 for (int j = 0;j < groupCnt;++j) {
@@ -70,9 +69,40 @@ namespace TERRAConfig {
                 }
             }
             Target = targetRaw;
+#ifdef _RES_DIR
+            std::cout << "Scene file at:"<< _RES_DIR + fileName << std::endl;
+            std::fstream fOut(_RES_DIR + fileName, std::ios::out | std::ios::trunc);
+            for (auto& tmp : targetRaw) {
+                fOut << tmp.x() << ", " << tmp.y() << std::endl;
+            }
+            fOut.close();
+#endif
         }
         else {
             std::cerr << "Invalid Parameter" << std::endl;
+        }
+        return 0;
+    }
+
+    int ProblemParam::ReadScene(const std::string& fileName) {
+#ifdef _RES_DIR
+        std::fstream fIn(_RES_DIR + fileName, std::ios::in);
+        std::string curLine;
+        double tmpx, tmpy;
+        while (std::getline(fIn, curLine)) {
+            std::istringstream readStr(curLine);
+            std::string tmp;
+            getline(readStr, tmp, ',');
+            tmpx = std::stod(tmp);
+            getline(readStr, tmp, ',');
+            tmpy = std::stod(tmp);
+            Target.push_back(Point_2(tmpx, tmpy));
+        }
+        fIn.close();
+#endif
+        std::cout << "--Read Scene: " << Target.size() << std::endl;
+        for (auto& tmp : Target) {
+            std::cout << tmp << std::endl;
         }
         return 0;
     }
@@ -96,6 +126,8 @@ namespace TERRAResult {
 
     DataSolution::~DataSolution() { }
 
+    DataSolution::DataSolution(double ugvDist, double ugvTime, double uavDist, double uavTime, double totalDist, double totalTime, int stop):ugvDist(ugvDist), ugvTime(ugvTime), uavDist(uavDist), uavTime(uavTime), totalDist(totalDist), totalTime(totalTime), stop(stop) { }
+    
     PathSolution::PathSolution(/* args */) { }
 
     PathSolution::~PathSolution() { }
@@ -107,16 +139,40 @@ int TERRA() {
     VectorXi solutionSetsLabelsV;
     // (1) Compute Voronoi Diagram
     VoronoiCoveringTimeOptimize(V1, coveredTarget);
+    std::cout << "--V1: " << V1.size() << std::endl;
+    for (auto& tmp : V1) {
+        std::cout << tmp << std::endl;
+    }
+    std::cout << "--coveredTarget: " << coveredTarget.size() << std::endl;
+    for (auto& tmp : coveredTarget) {
+        std::cout << tmp << std::endl;
+    }
     // (2) Compute Set Covering Problem
     GreedySetCovering(V1, coveredTarget, V2, setCoverTable, solutionSetsLabelsV);
+    std::cout << "--V2: " << V2.size() << std::endl;
+    for (auto& tmp : V2) {
+        std::cout << tmp << std::endl;
+    }
+    std::cout << "--setCoverTable: " << setCoverTable.rows() << ", " << setCoverTable.cols() << std::endl;
+    std::cout << setCoverTable << std::endl;
+    std::cout << "--solutionSetsLabelsV: " << solutionSetsLabelsV.size() << std::endl;
+    std::cout << solutionSetsLabelsV << std::endl;
     // Check If Home is a vertex of the solution
     vector<Point_2> V3 = CheckHome(V2);
+    std::cout << "--V3: " << V3.size() << std::endl;
+    for (auto& tmp : V3) {
+        std::cout << tmp << std::endl;
+    }
     if (TERRAConfig::problemParam.Gp.empty()) {
         //UGV's Path without Gp
         double ugvDist;
         std::vector<Point_2> ugvPath;
         Eigen::VectorXi rte;
         tspGaUgv(V3, ugvDist, ugvPath, rte);
+        std::cout << "--ugvPath: " << ugvPath.size() << std::endl;
+        for (auto& tmp : ugvPath) {
+            std::cout << tmp << std::endl;
+        }
         double ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
 
         //UAV's Path without Gp
@@ -124,7 +180,20 @@ int TERRA() {
         double uavDist, uavTime;
         int uavStop;
         UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, V1, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);
-        
+        std::cout << "--uavPath1: " << uavPath1.size() << std::endl;
+        for (auto& tmpv : uavPath1) {
+            for (auto& tmp1 : tmpv) {
+                std::cout << tmp1 << " -> ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "--uavPath2: " << uavPath2.size() << std::endl;
+        for (auto& tmpv : uavPath2) {
+            for (auto& tmp1 : tmpv) {
+                std::cout << tmp1 << " -> ";
+            }
+            std::cout << std::endl;
+        }
         //1st Solution without GOA
         auto totalTime = uavTime + ugvTime;
         auto totalDist = uavDist + ugvDist;

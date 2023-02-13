@@ -32,6 +32,8 @@
 *.app
 
 build
+lkhUtils/OBJ
+tsp_solution.*
 
 #vscode config
 .vscode

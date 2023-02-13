@@ -38,7 +38,9 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
             }
         }
     }
-//  Building scp_table, without empty columns. Deleting the vertices which
+    // std::cout << "--setCoverTable: " << setCoverTable.rows() << ',' << setCoverTable.cols() << std::endl;
+    // std::cout << setCoverTable << std::endl;
+    //  Building scp_table, without empty columns. Deleting the vertices which
 //  don't surround any waypoint
     std::vector<int> deletedVertices;
     MatrixXi setCoverTable_s(tlen, 0);
@@ -57,15 +59,15 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
     // Generate an adecuate labeling of the vertices, if it has been some vertice
     // deleted so Lp is the complement of deleted_vertices
     std::vector<int>Lp;
-    for (int i = 1;i <= vlen;++i) {
+    for (int i = 0;i < vlen;++i) {
         Lp.push_back(i);
         if (std::find(deletedVertices.begin(), deletedVertices.end(), i) != deletedVertices.end()) {//find i in deleted vertices
-            Lp.back() = 0;
+            Lp.back() = -1;
         }
     }
 
     std::sort(Lp.rbegin(), Lp.rend());
-    while (Lp.back() == 0) {
+    while (Lp.back() == -1) {
         Lp.pop_back();
     }
     std::reverse(Lp.begin(), Lp.end());
@@ -76,6 +78,12 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
     auto& A = setCoverTable_s;
     VectorXi setsLabelsV = Eigen::Map<VectorXi>(Lp.data(), Lp.size());
     MatrixXi solutionA;
+    // std::cout << "--A1: " << A.rows() << ',' << A.cols() << std::endl;
+    // std::cout << A << std::endl;
+    // std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
+    // std::cout << setsCardinalitiesV << std::endl;
+    // std::cout << "--setsCardinalitiesL: " << setsCardinalitiesL.rows() << ',' << setsCardinalitiesL.cols() << std::endl;
+    // std::cout << setsCardinalitiesL << std::endl;
     SetCoveringProblem(A, setsLabelsV, setsCardinalitiesV, setsCardinalitiesL, solutionA, solutionSetsLabelsV);
     for (int i = 0;i < vlen;++i) {
         for (int j = 0;j < solutionSetsLabelsV.size();++j) {
@@ -95,6 +103,7 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
             UniquelyCoveredL.push_back(i);
         }
     }
+    
     //construct solution
     VectorXi remainingElementsL;
     if (!UniquelyCoveredL.empty()) {
@@ -113,6 +122,8 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
         solutionA = A(all, toBeSelectedL);
         solutionSetsLabelsV = setsLabelsV(toBeSelectedL);
         A = A(all, notToBeSelectedL).eval();
+        // std::cout << "--A2: " << A.rows() << ',' << A.cols() << std::endl;
+        // std::cout << A << std::endl;
         setsLabelsV = setsLabelsV(notToBeSelectedL).eval();
         setsCardinalitiesV = setsCardinalitiesV(notToBeSelectedL).eval();
         remainingElementsL = (solutionA.rowwise().sum().array() == 0).cast<int>();
@@ -124,42 +135,51 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
     if (remainingElementsL.size()) {
         VectorXi sortedIndexVector(setsCardinalitiesV.size());
         std::iota(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), 0);
-        std::sort(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), [&](int i, int j) {return setsCardinalitiesV(i) > setsCardinalitiesV(j);});
+        std::stable_sort(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), [&](int i, int j) {return setsCardinalitiesV(i) > setsCardinalitiesV(j);});
+        // std::cout << "--sortedIndexVector: " << sortedIndexVector.rows() << ',' << sortedIndexVector.cols() << std::endl;
+        // std::cout << sortedIndexVector << std::endl;
         std::sort(setsCardinalitiesV.data(), setsCardinalitiesV.data() + setsCardinalitiesV.size(), std::greater<int>());
         setsLabelsV = setsLabelsV(sortedIndexVector).eval();
+        
         A = A(all, setsLabelsV).eval();
+        // std::cout << "--A3: " << A.rows() << ',' << A.cols() << std::endl;
+        // std::cout << A << std::endl;
 
-        while (remainingElementsL.size()) {
+        while (remainingElementsL.count()) {
             int thresholdN = 0;
             for (int i = 0;i < remainingElementsL.size();++i) {
                 thresholdN += A(i, 1) and remainingElementsL(i);
             }
-            VectorXi indexFocusedSetsLogical = (setsCardinalitiesV.array() >= thresholdN).cast<int>();
+            Eigen::Logical indexFocusedSetsLogical(setsCardinalitiesV.array() >= thresholdN);
+            // std::cout << "--indexFocusedSetsLogical: " << indexFocusedSetsLogical.rows() << ',' << indexFocusedSetsLogical.cols() << std::endl;
+            // std::cout << indexFocusedSetsLogical << std::endl;
             MatrixXi focusedSetsA = A(all, indexFocusedSetsLogical).eval();
             VectorXi focusedLabelsV = setsLabelsV(indexFocusedSetsLogical).eval();
             //TODO:greedy_scp.m:376
             VectorXi intV = remainingElementsL.transpose() * focusedSetsA;
             int selectedSetPosN;
             auto dummy = intV.maxCoeff(&selectedSetPosN);
-            solutionA.conservativeResize(NoChange, solutionA.cols() + 1);
+            // std::cout << "--focusedSetsA: " << focusedSetsA.rows() << ',' << focusedSetsA.cols() << std::endl;
+            // std::cout << focusedSetsA << std::endl;
+            // std::cout << "--focusedLabelsV: " << focusedLabelsV.rows() << ',' << focusedLabelsV.cols() << std::endl;
+            // std::cout << focusedLabelsV << std::endl;
+            solutionA.conservativeResize(focusedSetsA.rows(), solutionA.cols() + 1);
             solutionA(all, last) = focusedSetsA(all, selectedSetPosN);
+            // std::cout << "--solutionA: " << solutionA.rows() << ',' << solutionA.cols() << std::endl;
+            // std::cout << solutionA << std::endl;
             solutionSetsLabelsV.conservativeResize(solutionSetsLabelsV.size() + 1);
             solutionSetsLabelsV(solutionSetsLabelsV.size() - 1) = focusedLabelsV(selectedSetPosN);
-            remainingElementsL = remainingElementsL.eval().array() + focusedSetsA(all, selectedSetPosN).array();
-            for (int i = 0;i < remainingElementsL.size();++i) {
-                if (remainingElementsL(i)) {
-                    remainingElementsL(i) = 1;//避免bool值>1
-                }
-            }
+            remainingElementsL = (remainingElementsL.eval().array().cast<bool>() && !(focusedSetsA(all, selectedSetPosN).array().cast<bool>())).cast<int>();
+            
             vector<int> vectorRelativePosV;
-            for (int i = 0;i < indexFocusedSetsLogical.size();++i) {
-                if (indexFocusedSetsLogical(i)) {
+            for (int i = 0;i < setsCardinalitiesV.size();++i) {
+                if (setsCardinalitiesV(i) >= thresholdN) {
                     vectorRelativePosV.push_back(i);
                 }
             }
             int target = vectorRelativePosV[selectedSetPosN];
             vector<int> vectorNotRelativePosV;
-            for (int i = 0;i < indexFocusedSetsLogical.size();++i) {
+            for (int i = 0;i < setsCardinalitiesV.size();++i) {
                 if (target != i) {
                     vectorNotRelativePosV.push_back(i);
                 }
@@ -168,17 +188,26 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
             A = A(all, notRelativePosV).eval();
             setsLabelsV = setsLabelsV(notRelativePosV).eval();
             setsCardinalitiesV = setsCardinalitiesV(notRelativePosV).eval();
+            // std::cout << "--remainingElementsL: " << remainingElementsL.rows() << ',' << remainingElementsL.cols() << std::endl;
+            // std::cout << remainingElementsL << std::endl;
+            // std::cout << "--A4: " << A.rows() << ',' << A.cols() << std::endl;
+            // std::cout << A << std::endl;
+            // std::cout << "--setsLabelsV: " << setsLabelsV.rows() << ',' << setsLabelsV.cols() << std::endl;
+            // std::cout << setsLabelsV << std::endl;
+            // std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
+            // std::cout << setsCardinalitiesV << std::endl;
         }
-        auto tmpA = solutionA;
-        int removeCnt = 0;
-        for (int setN = solutionSetsLabelsV.size() - 1;setN >= 0;--setN) {
-            tmpA(all, setN).fill(0);
-            if (tmpA.rowwise().sum().all()) {
-                ++removeCnt;
+        vector<int> reserveIdx;
+        MatrixXi tmpA = solutionA;
+        for (int setIdx = solutionSetsLabelsV.size() - 1;setIdx >= 0;--setIdx) {
+            tmpA(all, setIdx).fill(0);
+            if (!(tmpA.rowwise().sum().all())) {
+                reserveIdx.push_back(setIdx);
+                tmpA(all, setIdx) = solutionA(all, setIdx);
             }
         }
-        solutionA = tmpA(all, seq(0, last - removeCnt));
-        solutionSetsLabelsV = solutionSetsLabelsV(seq(0, last - removeCnt)).eval();
+        solutionA = solutionA(all, reserveIdx).eval();
+        solutionSetsLabelsV = solutionSetsLabelsV(reserveIdx).eval();
     }
     VectorXi sortedSolutionIndexVector(solutionSetsLabelsV.size());
     std::iota(sortedSolutionIndexVector.data(), sortedSolutionIndexVector.data() + sortedSolutionIndexVector.size(), 0);

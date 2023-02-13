@@ -10,6 +10,10 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
 
     bool duplicated = false;
     while (!uncoveredTarget.empty()) {
+        // std::cout << "--uncoveredTarget:"<<uncoveredTarget.size() << std::endl;
+        // for (auto& tmp : uncoveredTarget) {
+        //     std::cout << tmp << std::endl;
+        // }
         vector<Point_2> nearestVertices;
         if (!trustedVertices.empty()) {
             for (int i = 0;i < uncoveredTarget.size();++i) {
@@ -51,50 +55,53 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
                 auto obj = delaunayTriangulation.dual(tmp);
                 trustedVertices.push_back(obj);
             }
-            // VD voronoiDiagram;
-            std::sort(trustedVertices.begin(), trustedVertices.end());
-            auto endPos = std::unique(trustedVertices.begin(), trustedVertices.end());
-            trustedVertices.resize(trustedVertices.end() - endPos);
+            
         }
         trustedVertices.insert(trustedVertices.end(), artificialVertices.begin(), artificialVertices.end());
+        std::sort(trustedVertices.begin(), trustedVertices.end());
+        auto endPos = std::unique(trustedVertices.begin(), trustedVertices.end());
+        trustedVertices.resize(endPos - trustedVertices.begin());
+        std::cout << "trustedVertices:" << trustedVertices.size() << std::endl;
+        for (auto& tmp : trustedVertices) {
+            std::cout << tmp << std::endl;
+        }
         for (int i = 0;i < uncoveredTarget.size();++i) {
-            int bestV = -1;
+            int bestVertice = -1;
             int targetCovered = -1;
             double Radius = TERRAConfig::problemParam.Radius;
             for (int j = 0;j < trustedVertices.size();++j) {
-                if (uncoveredTarget[i].x() != -1) {//really?????
+                if (uncoveredTarget[i].x() != INFINITY) {
                     double d = sqrt((uncoveredTarget[i] - trustedVertices[j]).squared_length());
-                    if (d < Radius and bestV != 0) {
+                    if (d < Radius and bestVertice != 0) {
                         Radius = d;
-                        bestV = j;
+                        bestVertice = j;
                         targetCovered = i;
                     }
                 }
             }
-            if (bestV != -1) {
+            if (bestVertice != -1) {
                 coveredTarget.push_back(uncoveredTarget[targetCovered]);
-                uncoveredTarget[targetCovered] = Point_2(-1, -1);
-                V1.push_back(trustedVertices[bestV]);
+                uncoveredTarget[targetCovered] = Point_2(INFINITY, INFINITY);
+                V1.push_back(trustedVertices[bestVertice]);
             }
         }
         int delCnt = 0;
         for (auto &tmp : uncoveredTarget) {
-            if (tmp.x() == -1) {
+            if (isinf(tmp.x())) {
                 ++delCnt;
             }
         }
         if (delCnt) {
             auto tmpWaypointNotCovered = uncoveredTarget;
             uncoveredTarget.clear();
-            int ty = 0;
             for (auto &tmp : tmpWaypointNotCovered) {
-                if (tmp.x() != -1) {
-                    ++ty;
+                if (!isinf(tmp.x())) {
                     uncoveredTarget.push_back(tmp);
                 }
             }
         }
     }
+    std::sort(V1.begin(), V1.end());
     return 0;
 }
 

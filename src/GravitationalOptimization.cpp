@@ -40,12 +40,38 @@ Point_2 FOptimus(const vector<Point_2>& pa, const Point_2& pm, const Point_2& av
         cpa.push_back(CK::Point_2(pa[i].x(), pa[i].y()));
     }
     Line_2 line(cpm, cavg);
-    for (auto &centre : cpa) {
+    vector<Point_2> intersect;
+    for (auto& centre : cpa) {
         Circle_2 circle(centre, CGAL::square(TERRAConfig::problemParam.Radius));
-        typedef typename CGAL::CK2_Intersection_traits<CK, Line_2, Circle_2>::type IntersectionResult;
         std::vector<IntersectionResult> ans;
         CGAL::intersection(line, circle, std::back_inserter(ans));
-        
+        for (const auto& elem : ans) {
+            const auto& tmp = boost::get<std::pair<CGAL::Circular_arc_point_2<CGAL::Exact_circular_kernel_2>, unsigned int>>(elem).first;
+            intersect.emplace_back(CGAL::to_double(tmp.x()), CGAL::to_double(tmp.y()));
+        }
     }
-    
+    vector<Point_2> validPoint;
+    for (int j = 0;j < intersect.size();++j) {
+        int cnt = 0;
+        for (int k = 0;k < pa.size();++k) {
+            if (sqrt((intersect[j] - pa[k]).squared_length()) <= TERRAConfig::problemParam.Radius) {
+                ++cnt;
+            }
+        }
+        if (cnt == pa.size()) {
+            validPoint.push_back(intersect[j]);
+        }
+    }
+    double minDist = INFINITY, minX = INFINITY, minY = INFINITY;
+    for (const auto& tmp : validPoint) {
+        if (sqrt((tmp - avg).squared_length()) <= minDist) {
+            minX = tmp.x();
+            minY = tmp.y();
+        }
+    }
+    return Point_2(minX, minY);
+}
+
+inline bool isSamePoint(const Point_2& p1, const Point_2& p2) {
+    return (p1 - p2).squared_length() < eps;
 }
