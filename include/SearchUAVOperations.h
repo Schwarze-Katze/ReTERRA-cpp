@@ -31,11 +31,14 @@ public:
     Vertex(const Vertex* parent, Point_2& _p, double t, int g, double h, double f, int r);
     double x();
     double y();
+    friend std::ostream& operator<<(std::ostream& os, const Vertex& v);
 };
 
+std::ostream& operator<<(std::ostream& os, const Vertex& v);
+
 int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop);
-double ComputeH_LKH2(const vector<Point_2>& path, const Vertex& vertexNode);
-Vertex FindLowest(vector<Vertex>& OPEN);
+double LKHComputeH(const vector<Point_2>& path, const Vertex& vertexNode);
+Vertex* FindLowest(vector<Vertex>& OPEN);
 void DeleteNode(vector<Vertex>& OPEN);
 bool isSamePoint(const Point_2& p1, const Point_2& p2);
 vector<Vertex> ExpandGraph(const Vertex& currentNode, const vector<Point_2>& path, const Vertex& vertexNode);

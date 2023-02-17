@@ -9,7 +9,7 @@ typedef CGAL::Simple_cartesian<double> Kernel;
 typedef Kernel::Point_2 Point_2;
 
 
-const double eps = 1e-6;
+const double eps = 1e-3;
 
 namespace TERRAConfig {
 

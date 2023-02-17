@@ -19,13 +19,19 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
                 VectorXi rteT;
                 double dis, t;
                 int stop;
+                std::cout << "--subPath: " << subPath.size() << std::endl;
+                for (auto& tmp : subPath) {
+                    std::cout << tmp << std::endl;
+                }
                 SearchUAVOperations(subPath, rteT, dis, t, stop);
+                std::cout << "--rteT: " << rteT.size() << std::endl;
+                std::cout << rteT << std::endl;
                 time += t;
                 distance += dis;
                 stops += stop;
                 //UAV Path for Distance-Based Searching or Time-Based Searching
                 for (int z = 0;z < UGVPath.size();++z) {
-                    if (UGVPath[z] == V1[i]) {
+                    if (isSamePoint(UGVPath[z], V1[i])) {
                         vector<Point_2> singlePathPack;
                         for (auto tmp : rteT) {
                             singlePathPack.push_back(subPath[tmp]);
@@ -37,4 +43,8 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
         }
     }
     return 0;
+}
+
+inline bool isSamePoint(const Point_2& p1, const Point_2& p2) {
+    return (p1 - p2).squared_length() < eps;
 }

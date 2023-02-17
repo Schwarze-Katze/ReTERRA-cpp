@@ -1,4 +1,5 @@
 #include "TSP.h"
+#include "SearchUAVOperations.h"
 
 //   Syntax:
 //   TSPsolution = LKH_TSP(CostMatrix,pars_struct,fname_tsp,LKHdir,TSPLIBdir)
