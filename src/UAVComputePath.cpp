@@ -19,10 +19,6 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
                 VectorXi rteT;
                 double dis, t;
                 int stop;
-                std::cout << "--subPath: " << subPath.size() << std::endl;
-                for (auto& tmp : subPath) {
-                    std::cout << tmp << std::endl;
-                }
                 SearchUAVOperations(subPath, rteT, dis, t, stop);
                 std::cout << "--rteT: " << rteT.size() << std::endl;
                 std::cout << rteT << std::endl;

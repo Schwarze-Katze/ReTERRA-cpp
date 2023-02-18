@@ -159,46 +159,25 @@ int TERRA() {
     std::cout << solutionSetsLabelsV << std::endl;
     // Check If Home is a vertex of the solution
     vector<Point_2> V3 = CheckHome(V2);
-    std::cout << "--V3: " << V3.size() << std::endl;
-    for (auto& tmp : V3) {
-        std::cout << tmp << std::endl;
-    }
+    // std::cout << "--V3: " << V3.size() << std::endl;
+    // for (auto& tmp : V3) {
+    //     std::cout << tmp << std::endl;
+    // }
+    double ugvDist, ugvTime, uavDist, uavTime;
+    int uavStop;
+    std::vector<Point_2> ugvPath;
+    std::vector<std::vector<Point_2>> uavPath1, uavPath2;
+    Eigen::VectorXi rte;
     if (TERRAConfig::problemParam.Gp.empty()) {
         //UGV's Path without Gp
-        double ugvDist;
-        std::vector<Point_2> ugvPath;
-        Eigen::VectorXi rte;
         tspGaUgv(V3, ugvDist, ugvPath, rte);
-        std::cout << "--ugvPath: " << ugvPath.size() << std::endl;
-        for (auto& tmp : ugvPath) {
-            std::cout << tmp << std::endl;
-        }
-        double ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
-
+        // std::cout << "--ugvPath: " << ugvPath.size() << std::endl;
+        // for (auto& tmp : ugvPath) {
+        //     std::cout << tmp << std::endl;
+        // }
+        ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
         //UAV's Path without Gp
-        std::vector<std::vector<Point_2>> uavPath1, uavPath2;
-        double uavDist, uavTime;
-        int uavStop;
         UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, V1, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);
-        std::cout << "--uavPath1: " << uavPath1.size() << std::endl;
-        for (auto& tmpv : uavPath1) {
-            for (auto& tmp1 : tmpv) {
-                std::cout << tmp1 << " -> ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "--uavPath2: " << uavPath2.size() << std::endl;
-        for (auto& tmpv : uavPath2) {
-            for (auto& tmp1 : tmpv) {
-                std::cout << tmp1 << " -> ";
-            }
-            std::cout << std::endl;
-        }
-        //1st Solution without GOA
-        auto totalTime = uavTime + ugvTime;
-        auto totalDist = uavDist + ugvDist;
-        TERRAResult::dataSol = TERRAResult::DataSolution(ugvDist, ugvTime, uavDist, uavTime, totalDist, totalTime, uavStop);
-        BuildSolution(ugvPath, uavPath1, uavPath2);
     }
     else {
         Point_2 avg;
@@ -217,25 +196,31 @@ int TERRA() {
             avg = { Eigen::median(V3Mat.row(0)), Eigen::median(V3Mat.row(1)) };
         }
         std::vector<Point_2> VOpt, VRes;
-        //GravitationalOptimization(V1,avg,coveredTarget,solutionSetsLabelsV,setCoverTable,VOpt,VRes);
+        GravitationalOptimization(V1,avg,coveredTarget,solutionSetsLabelsV,setCoverTable,VOpt,VRes);
         //Genetic Algorithm to UGV Path
-        //VOpt.push_front(Home)
-        double ugvDist;
-        std::vector<Point_2> ugvPath;
-        Eigen::VectorXi rte;
         tspGaUgv(VOpt, ugvDist, ugvPath, rte);
-        double ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
+        ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
         //Search Algorithm to UAV Path
-        std::vector<std::vector<Point_2>> uavPath1, uavPath2;
-        double uavDist, uavTime;
-        int uavStop;
         UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, VRes, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);
-        //i'st Solution
-        auto totalTime = uavTime + ugvTime;
-        auto totalDist = uavDist + ugvDist;
-        TERRAResult::dataSol = TERRAResult::DataSolution(ugvDist, ugvTime, uavDist, uavTime, totalDist, totalTime, uavStop);
-        BuildSolution(ugvPath, uavPath1, uavPath2);
     }
+    auto totalTime = uavTime + ugvTime;
+    auto totalDist = uavDist + ugvDist;
+    TERRAResult::dataSol = TERRAResult::DataSolution(ugvDist, ugvTime, uavDist, uavTime, totalDist, totalTime, uavStop);
+    // std::cout << "--uavPath1: " << uavPath1.size() << std::endl;
+    // for (auto& tmpv : uavPath1) {
+    //     for (auto& tmp1 : tmpv) {
+    //         std::cout << tmp1 << " -> ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    std::cout << "--uavPath2: " << uavPath2.size() << std::endl;
+    for (auto& tmpv : uavPath2) {
+        for (auto& tmp1 : tmpv) {
+            std::cout << tmp1 << " -> ";
+        }
+        std::cout << "END OF PATH" << std::endl;
+    }
+    BuildSolution(ugvPath, uavPath1, uavPath2);
     //TODO:visualisation
     return 0;
 }

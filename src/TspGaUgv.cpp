@@ -21,8 +21,8 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
         }
     }
     dmat = dmat.eval().cwiseSqrt();
-    // std::cout << "--dmat: " << dmat.rows() << ", " << dmat.cols() << std::endl;
-    // std::cout << dmat << std::endl;
+    std::cout << "--dmat: " << dmat.rows() << ", " << dmat.cols() << std::endl;
+    std::cout << dmat << std::endl;
     popSize = std::lround(4 * std::ceil(double(popSize) / 4));
     numIter = std::max(1, numIter);
     
@@ -177,15 +177,16 @@ int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, Vec
         pop = newPop;
     }
     //Translate the path to a Home to Home path i.e., 1,..,..,..,1
-    VectorXi idxOptRoute = optRoute.cwiseEqual(1).cast<int>();
+    VectorXi idxOptRoute = optRoute.cwiseEqual(0).cast<int>();
+    std::cout << "--optRoute: " << optRoute.size() << std::endl;
+    std::cout << optRoute << std::endl;
     int idx = std::find(idxOptRoute.begin(), idxOptRoute.end(), 1) - idxOptRoute.begin();
     int len = optRoute.size();
-    int cycles = len - idx + 1;
+    int cycles = len - idx;
     rte.resize(optRoute.size());
     rte(seq(cycles, last)) = optRoute(seq(0, last - cycles));
-    if (cycles) {
-        rte(seq(0, cycles - 1)) = optRoute(lastN(cycles));
-    }//rte = circshift(optRoute,cycles);
+    rte(seq(0, cycles - 1)) = optRoute(lastN(cycles));
+    //rte = circshift(optRoute,cycles);
     if (lastDepot == 1) {
         rte.conservativeResize(optRoute.size() + 1);
         rte(optRoute.size()) = 0;

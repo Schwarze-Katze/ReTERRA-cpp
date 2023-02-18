@@ -2,7 +2,7 @@
 
 int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist, double& time, int& stop) {
     Point_2 home = path.at(0);
-    int stops = 0;
+    stop = 0;
     auto N = path.size();
     auto h = N - 1;
     Vertex *vertexNode = new Vertex(nullptr, home, 0, 0, 0, 0, N - 1);
@@ -52,8 +52,8 @@ int SearchUAVOperations(const vector<Point_2>& path, VectorXi& rte, double& dist
             rte(i) = tmpRte[i];
         }
         for (int i = 1;i < rte.size() - 1;++i) {
-            if (rte(i) == 1) {
-                stops++;
+            if (rte(i) == 0) {
+                stop++;
             }
         }
         time = currentNode->t;
@@ -108,8 +108,8 @@ double LKHComputeH(const vector<Point_2>& path, const Vertex& suc) {
                 costMatrix(i, j) = getTime(getDistance(rnodes[i], rnodes[j]));
             }
         }
-        std::cout << "--costMatrix: " << costMatrix.rows() << ", " << costMatrix.cols() << std::endl;
-        std::cout << costMatrix << std::endl;
+        // std::cout << "--costMatrix: " << costMatrix.rows() << ", " << costMatrix.cols() << std::endl;
+        // std::cout << costMatrix << std::endl;
         if (n > 2) {
             TSPSolution = LKH_TSP(costMatrix, 1, "tsp_solution");
             std::cout << "--TSPSolution: " << TSPSolution.rows() << ", " << TSPSolution.cols() << std::endl;
@@ -123,48 +123,45 @@ double LKHComputeH(const vector<Point_2>& path, const Vertex& suc) {
         for (int i = 0;i < n;++i) {
             orderedNodes[i] = rnodes[TSPSolution[i] - 1];
         }
-        std::cout << "--orderedNodes: " << orderedNodes.size() << std::endl;
-        for (auto& tmp : orderedNodes) {
-            std::cout << tmp << std::endl;
-        }
-        std::cout << "--rnodes: " << rnodes.size() << std::endl;
-        for (auto& tmp : rnodes) {
-            std::cout << tmp << std::endl;
-        }
+        // std::cout << "--orderedNodes: " << orderedNodes.size() << std::endl;
+        // for (auto& tmp : orderedNodes) {
+        //     std::cout << tmp << std::endl;
+        // }
+        // std::cout << "--rnodes: " << rnodes.size() << std::endl;
+        // for (auto& tmp : rnodes) {
+        //     std::cout << tmp << std::endl;
+        // }
         cv::Mat cvOrderedNodes(n - 1, 2, CV_32F);
         for(int i=1;i<n;++i){
             cvOrderedNodes.at<float>(i - 1, 0) = orderedNodes[i].x();
             cvOrderedNodes.at<float>(i - 1, 1) = orderedNodes[i].y();
         }
         cv::Mat labels;
-        std::cout << "--cvOrderedNodes: " << cvOrderedNodes.rows << ", " << cvOrderedNodes.cols << std::endl;
-        std::cout << cvOrderedNodes << std::endl;
+        // std::cout << "--cvOrderedNodes: " << cvOrderedNodes.rows << ", " << cvOrderedNodes.cols << std::endl;
+        // std::cout << cvOrderedNodes << std::endl;
         //NOTE: apply 3 attempts then pick the minimum. Set attempts to 1 for better performance.
+        So = (So > n - 1) ? n - 1 : So;
         cv::kmeans(cvOrderedNodes, So, labels, cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 100, 1e-6), 3, cv::KMEANS_PP_CENTERS);
         MatrixXd clusterMatrix(3, So);
         clusterMatrix.row(0).setConstant(0);
         clusterMatrix.row(1).setConstant(orderedNodes[0].x());
         clusterMatrix.row(2).setConstant(orderedNodes[0].y());
-        std::cout << "--labels: " << labels.rows << ", " << labels.cols << std::endl;
-        std::cout << labels << std::endl;
-        std::cout << "--clusterMatrix1: " << clusterMatrix.rows() << ", " << clusterMatrix.cols() << std::endl;
-        std::cout << clusterMatrix << std::endl;
+        // std::cout << "--labels: " << labels.rows << ", " << labels.cols << std::endl;
+        // std::cout << labels << std::endl;
         for (int i = 1;i < n;++i) {
             int idx = labels.at<int>(i - 1);
             clusterMatrix(0, idx) += getTime(getDistance(clusterMatrix(1, idx), clusterMatrix(2, idx), orderedNodes[i].x(), orderedNodes[i].y()));
             clusterMatrix(1, idx) = orderedNodes[i].x();
             clusterMatrix(2, idx) = orderedNodes[i].y();
         }
-        std::cout << "--clusterMatrix2: " << clusterMatrix.rows() << ", " << clusterMatrix.cols() << std::endl;
-        std::cout << clusterMatrix << std::endl;
         double Tch = costToHome * 2;
         for (int i = 0;i < So;++i) {
             clusterMatrix(0, i) += getTime(getDistance(clusterMatrix(1, i), clusterMatrix(2, i), path[0].x(), path[0].y()));
             double Se = clusterMatrix(0, i) / TERRAConfig::uavData.TimeBudget;
             h += Se * Tch + 2 * clusterMatrix(0, i);
         }
-        std::cout << "--clusterMatrix3: " << clusterMatrix.rows() << ", " << clusterMatrix.cols() << std::endl;
-        std::cout << clusterMatrix << std::endl;
+        // std::cout << "--clusterMatrix: " << clusterMatrix.rows() << ", " << clusterMatrix.cols() << std::endl;
+        // std::cout << clusterMatrix << std::endl;
     }
     return h;
 }
