@@ -4,9 +4,9 @@
 ```
 sudo apt install libcgal-dev
 ```
-2. Install Eigen
+2. Install OpenCV
 ```
-sudo apt install libeigen3-dev
+sudo apt install libopencv-dev
 ```
 3. Git clone
 ```

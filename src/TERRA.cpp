@@ -85,24 +85,33 @@ namespace TERRAConfig {
     }
 
     int ProblemParam::ReadScene(const std::string& fileName) {
+        try {
 #ifdef _RES_DIR
-        std::fstream fIn(_RES_DIR + fileName, std::ios::in);
-        std::string curLine;
-        double tmpx, tmpy;
-        while (std::getline(fIn, curLine)) {
-            std::istringstream readStr(curLine);
-            std::string tmp;
-            getline(readStr, tmp, ',');
-            tmpx = std::stod(tmp);
-            getline(readStr, tmp, ',');
-            tmpy = std::stod(tmp);
-            Target.push_back(Point_2(tmpx, tmpy));
-        }
-        fIn.close();
+            std::fstream fIn(_RES_DIR + fileName, std::ios::in);
+            std::string curLine;
+            double tmpx, tmpy;
+            while (std::getline(fIn, curLine)) {
+                std::istringstream readStr(curLine);
+                std::string tmp;
+                getline(readStr, tmp, ',');
+                tmpx = std::stod(tmp);
+                getline(readStr, tmp, ',');
+                tmpy = std::stod(tmp);
+                Target.push_back(Point_2(tmpx, tmpy));
+            }
+            fIn.close();
 #endif
-        std::cout << "--Read Scene: " << Target.size() << std::endl;
-        for (auto& tmp : Target) {
-            std::cout << tmp << std::endl;
+            std::cout << "--Read Scene: " << Target.size() << std::endl;
+            for (auto& tmp : Target) {
+                std::cout << tmp << std::endl;
+            }
+            if (Target.size() != TargetCnt) {
+                throw "Scene size not match";
+            }
+        }
+        catch (const char* e) {
+            std::cerr << e << '\n';
+            exit(1);
         }
         return 0;
     }
