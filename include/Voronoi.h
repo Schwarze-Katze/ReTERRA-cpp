@@ -30,4 +30,5 @@ int VoronoiCoveringTimeOptimize(//No input
     std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget);
 
 bool isDuplicated(std::vector<Point_2> const, std::vector<Point_2> const);
+bool isUnique(const Point_2& p1, const Point_2& p2);
 

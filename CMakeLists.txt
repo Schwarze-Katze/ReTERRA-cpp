@@ -30,7 +30,7 @@ endif()
 #   message(STATUS "This project requires the Eigen library, and will not be compiled.")
 #   return()
 # endif()
-# include_directories(${Eigen3_INCLUDE_DIRS})
+# include_directories(${Eigen3_INCLUDE_DIRS}/eigen3)
 # message(STATUS "Found Eigen3 include dir:" ${EIGEN3_INCLUDE_DIRS})
 
 find_package(OpenCV REQUIRED)

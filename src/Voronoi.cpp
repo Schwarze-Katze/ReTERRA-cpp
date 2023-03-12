@@ -29,7 +29,7 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
                 nearestVertices.push_back(trustedVertices[idx]);
             }
             std::sort(nearestVertices.begin(), nearestVertices.end());
-            auto endPos = std::unique(nearestVertices.begin(), nearestVertices.end());
+            auto endPos = std::unique(nearestVertices.begin(), nearestVertices.end(), isUnique);
             nearestVertices.resize(nearestVertices.end() - endPos);
             duplicated = isDuplicated(nearestVertices, usedVertices);
             usedVertices.insert(usedVertices.end(), nearestVertices.begin(), nearestVertices.end());
@@ -59,10 +59,14 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
         }
         trustedVertices.insert(trustedVertices.end(), artificialVertices.begin(), artificialVertices.end());
         std::sort(trustedVertices.begin(), trustedVertices.end());
-        auto endPos = std::unique(trustedVertices.begin(), trustedVertices.end());
+        auto endPos = std::unique(trustedVertices.begin(), trustedVertices.end(), isUnique);
         trustedVertices.resize(endPos - trustedVertices.begin());
-        std::cout << "trustedVertices:" << trustedVertices.size() << std::endl;
+        std::cout << "----trustedVertices:" << trustedVertices.size() << std::endl;
         for (auto& tmp : trustedVertices) {
+            std::cout << tmp << std::endl;
+        }
+        std::cout << "----uncoveredTarget:" << uncoveredTarget.size() << std::endl;
+        for (auto& tmp : uncoveredTarget) {
             std::cout << tmp << std::endl;
         }
         for (int i = 0;i < uncoveredTarget.size();++i) {
@@ -72,7 +76,7 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
             for (int j = 0;j < trustedVertices.size();++j) {
                 if (uncoveredTarget[i].x() != INFINITY) {
                     double d = sqrt((uncoveredTarget[i] - trustedVertices[j]).squared_length());
-                    if (d < Radius and bestVertice != 0) {
+                    if (d < Radius) {
                         Radius = d;
                         bestVertice = j;
                         targetCovered = i;
@@ -100,6 +104,9 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
                 }
             }
         }
+        else {
+            trustedVertices.insert(trustedVertices.end(), uncoveredTarget.begin(), uncoveredTarget.end());
+        }
     }
     std::sort(V1.begin(), V1.end());
     return 0;
@@ -114,4 +121,8 @@ bool isDuplicated(vector<Point_2> const v1, vector<Point_2> const v2){
         }
     }
     return false;
+}
+
+bool isUnique(const Point_2& p1, const Point_2& p2) {
+    return(p1 - p2).squared_length() < eps;
 }

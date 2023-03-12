@@ -148,17 +148,19 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
         while (remainingElementsL.count()) {
             int thresholdN = 0;
             for (int i = 0;i < remainingElementsL.size();++i) {
-                thresholdN += A(i, 1) and remainingElementsL(i);
+                thresholdN += A(i, 0) and remainingElementsL(i);
             }
             Eigen::Logical indexFocusedSetsLogical(setsCardinalitiesV.array() >= thresholdN);
-            // std::cout << "--indexFocusedSetsLogical: " << indexFocusedSetsLogical.rows() << ',' << indexFocusedSetsLogical.cols() << std::endl;
-            // std::cout << indexFocusedSetsLogical << std::endl;
             MatrixXi focusedSetsA = A(all, indexFocusedSetsLogical).eval();
             VectorXi focusedLabelsV = setsLabelsV(indexFocusedSetsLogical).eval();
-            //TODO:greedy_scp.m:376
+            std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
+            std::cout << setsCardinalitiesV << std::endl;
+            std::cout << "--A: " << A.rows() << ',' << A.cols() << std::endl;
+            std::cout << A << std::endl;
             VectorXi intV = remainingElementsL.transpose() * focusedSetsA;
+            std::cout << "--intV: " << intV.rows() << ',' << intV.cols() << std::endl << intV << std::endl;
             int selectedSetPosN;
-            auto dummy = intV.maxCoeff(&selectedSetPosN);
+            intV.maxCoeff(&selectedSetPosN);
             // std::cout << "--focusedSetsA: " << focusedSetsA.rows() << ',' << focusedSetsA.cols() << std::endl;
             // std::cout << focusedSetsA << std::endl;
             // std::cout << "--focusedLabelsV: " << focusedLabelsV.rows() << ',' << focusedLabelsV.cols() << std::endl;

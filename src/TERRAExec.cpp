@@ -5,9 +5,9 @@ inline int TERRALaunch();
 
 namespace TERRAConfig{
     ConfigParam configParam = ConfigParam(1, true, true, false, "");
-    ProblemParam problemParam = ProblemParam(21, 0, 1, 0.5, 0.5, 200, "GravityCenter");
+    ProblemParam problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200, "GravityCenter");
     UGVData ugvData = UGVData(0.4, 430, 9, 2, 0.06, 2, 2.7);
-    UAVData uavData = UAVData(308, 0.5, 4, 4);
+    UAVData uavData = UAVData(308, 1, 4, 4);
 }
 
 namespace TERRAResult {
@@ -37,8 +37,8 @@ inline int TERRALaunch() {
             iterDir = configParam.saveDir + "Iteration" + std::to_string(iter) + "\\";
             system(("mkdir .\\" + iterDir).c_str());
         }
-        //problemParam.SceneGenerator("TestScene.in");
-        problemParam.ReadScene("TestScene.in");
+        problemParam.SceneGenerator("TestScene.in");
+        // problemParam.ReadScene("TestScene.in");
         TERRA();
         std::cout << "Finished computing scenario " << iter << std::endl;
     }
