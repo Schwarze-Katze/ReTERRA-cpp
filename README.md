@@ -1,19 +1,20 @@
 # ReTERRA-cpp
 ## Installation Guide
-1. Install CGAL
+1. Install dependency
 ```
-sudo apt install libcgal-dev
+sudo apt update
+sudo apt install libcgal-dev libopencv-dev libyaml-cpp-dev
 ```
-2. Install OpenCV
-```
-sudo apt install libopencv-dev
-```
-3. Git clone
+2. Git clone
 ```
 git clone https://github.com/Schwarze-Katze/ReTERRA-cpp
 cd ReTERRA-cpp
 ```
-4. Build
+3. Build
 ```
 bash build.sh
+```
+4.Run
+```
+bash run.sh
 ```
