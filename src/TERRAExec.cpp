@@ -1,10 +1,10 @@
 #include "TERRAUtility.h"
-
+#include <set>
 inline int initTERRAParam();
 inline int TERRALaunch();
 inline int ResultOutput(const std::string& iterDir);
 
-namespace TERRAConfig{
+namespace TERRAConfig {
     ConfigParam configParam;
     ProblemParam problemParam;
     UGVData ugvData;
@@ -54,23 +54,53 @@ inline int TERRALaunch() {
 }
 
 inline int ResultOutput(const std::string& iterDir) {
-    std::fstream fOut(iterDir + "ugv.out", std::ios::out | std::ios::trunc);
-    for (auto& tmp : TERRAResult::pathSol) {
-        fOut << tmp.ugv.x() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
+    std::unordered_set < std::pair<int, int>, boost::hash<std::pair<int, int>>> scene, target;
+    for (auto& tmp : TERRAConfig::problemParam.Target) {
+        scene.insert(std::make_pair(int(tmp.x()), int(tmp.y())));
     }
-    for (auto& tmp : TERRAResult::pathSol) {
-        fOut << tmp.ugv.y() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
+    YAML::Node config, map, agents;
+    map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
+    map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
+    for (int i = 0; i < 200;++i) {
+        std::vector<int> obs(2);
+        do {
+            obs = { rand() % int(TERRAConfig::problemParam.AreaSize),rand() % int(TERRAConfig::problemParam.AreaSize) };
+        } while (scene.count(std::make_pair(obs[0], obs[1])) or target.count(std::make_pair(obs[0], obs[1])));
+        map["obstacles"].push_back(obs);
     }
-    fOut.close();
-    fOut.open(iterDir + "uav.out", std::ios::out | std::ios::trunc);
-    for (auto& tmpUGV : TERRAResult::pathSol) {
-        for (auto& tmpUAV : tmpUGV.uav2) {
-            fOut << tmpUAV.x() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
+    for (int i = 0;i < TERRAResult::pathSol.size();++i) {
+        auto& path = TERRAResult::pathSol[i];
+        YAML::Node agent;
+        agent["name"] = "agent" + std::to_string(i);
+        std::vector<int> point = { int(path.ugv.x()),int(path.ugv.y()) };
+        agent["start"].push_back(point);
+        for (auto& tmp : path.uav2) {
+            point = { int(tmp.x()),int(tmp.y()) };
+            agent["potentialGoals"].push_back(point);
         }
-        for (auto& tmpUAV : tmpUGV.uav2) {
-            fOut << tmpUAV.y() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
-        }
+        agents.push_back(agent);
     }
+    config["map"] = map;
+    config["agents"] = agents;
+    std::fstream fOut(iterDir + "output.yaml", std::ios::out | std::ios::trunc);
+    fOut << config;
+    // std::fstream fOut(iterDir + "ugv.out", std::ios::out | std::ios::trunc);
+    // for (auto& tmp : TERRAResult::pathSol) {
+    //     fOut << tmp.ugv.x() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
+    // }
+    // for (auto& tmp : TERRAResult::pathSol) {
+    //     fOut << tmp.ugv.y() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
+    // }
+    // fOut.close();
+    // fOut.open(iterDir + "uav.out", std::ios::out | std::ios::trunc);
+    // for (auto& tmpUGV : TERRAResult::pathSol) {
+    //     for (auto& tmpUAV : tmpUGV.uav2) {
+    //         fOut << tmpUAV.x() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
+    //     }
+    //     for (auto& tmpUAV : tmpUGV.uav2) {
+    //         fOut << tmpUAV.y() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
+    //     }
+    // }
     fOut.close();
     return 0;
 }

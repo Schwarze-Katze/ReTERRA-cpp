@@ -42,6 +42,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 message(STATUS "Found OpenCV include dir:" ${OpenCV_INCLUDE_DIRS})
 message(STATUS "Found OpenCV lib:" ${OpenCV_LIBS})
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YAMLCPP yaml-cpp REQUIRED)
+if(YAMLCPP_VERSION VERSION_GREATER "0.5.0")
+    add_definitions(-DHAVE_YAMLCPP_GT_0_5_0)
+endif()
 # Add this line if liblkhUtils.a is missing or broken
 add_subdirectory(lkhUtils ${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
 
@@ -69,3 +74,4 @@ target_link_libraries(${PROJECT_NAME} lkhUtils)
 target_link_libraries(${PROJECT_NAME} ${CGAL_LIBRARIES})
 # target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${YAMLCPP_LIBRARIES})

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <Eigen/Eigen>
+#include <yaml-cpp/yaml.h>
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 
@@ -189,6 +190,7 @@ namespace Eigen {
         return median(m);
     }
 }
+
 
 //  This function executes the whole solution designed and developed to solve
 //  the Energy Constrained UAV and Charging Station UGV Routing Problem (ECU-CSURP).
