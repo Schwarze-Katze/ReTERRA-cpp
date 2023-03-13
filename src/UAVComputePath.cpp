@@ -22,6 +22,11 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
                 SearchUAVOperations(subPath, rteT, dis, t, stop);
                 std::cout << "--rteT: " << rteT.size() << std::endl;
                 std::cout << rteT << std::endl;
+                std::cout << "--UGVPath: " << UGVPath.size() << std::endl;
+                for (auto& tmp : UGVPath) {
+                    std::cout << tmp << std::endl;
+                }
+                
                 time += t;
                 distance += dis;
                 stops += stop;

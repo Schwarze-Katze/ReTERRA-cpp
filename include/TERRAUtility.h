@@ -10,7 +10,7 @@ typedef CGAL::Simple_cartesian<double> Kernel;
 typedef Kernel::Point_2 Point_2;
 
 
-const double eps = 1e-3;
+const double eps = 1e-8;
 
 namespace TERRAConfig {
 
@@ -57,7 +57,7 @@ namespace TERRAConfig {
         ProblemParam();
         ProblemParam(int targetCnt, int radius, int delta, double homeX, double homeY, int area, const std::string& Gp);
         ~ProblemParam();
-        int SceneGenerator(const std::string& fileName);
+        int SceneGenerator(const std::string& fileName, const std::string& iterDir);
         int ReadScene(const std::string& fileName);
     };
     

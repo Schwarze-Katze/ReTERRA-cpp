@@ -10,12 +10,11 @@ namespace TERRAConfig {
     ConfigParam::ConfigParam(int iter, bool printAns, bool saveAns, bool vrep, const std::string& _fullname):iterations(iter), printResults(printAns), saveResults(saveAns), Vrep(vrep), fullName(_fullname) {
         time_t now = time(0);
         tm* ltm = localtime(&now);
-        saveDir = "Results\\Test-" + std::to_string(ltm->tm_year + 1900) + "." + std::to_string(ltm->tm_mon + 1) + "." + std::to_string(ltm->tm_mday) + "." + std::to_string(ltm->tm_hour) + "." + std::to_string(ltm->tm_min) + "\\";
+        saveDir = "Results/Test-" + std::to_string(ltm->tm_year + 1900) + "." + std::to_string(ltm->tm_mon + 1) + "." + std::to_string(ltm->tm_mday) + "_" + std::to_string(ltm->tm_hour) + "." + std::to_string(ltm->tm_min) + "." + std::to_string(ltm->tm_sec) + "/";
 
         if (saveResults) {
-            std::cout << ("mkdir .\\" + saveDir).c_str() << std::endl;
-            system(("mkdir .\\" + saveDir).c_str());//Create directory if saveresults = true
-            system("pwd");
+            std::cout << "mkdir -p ./" + saveDir << std::endl;
+            system(("mkdir -p ./" + saveDir).c_str());//Create directory if saveresults = true
         }
     }
 
@@ -46,7 +45,7 @@ namespace TERRAConfig {
     // delta = 2
     // Solution : This algorithm will create 6 groups of 2 target points inside a
     // r = 3 km of radius in a 50km2 area
-    int ProblemParam::SceneGenerator(const std::string& fileName) {
+    int ProblemParam::SceneGenerator(const std::string& fileName, const std::string& iterDir) {
         std::random_device realRng;
         std::mt19937 rng(realRng());
 
@@ -70,12 +69,15 @@ namespace TERRAConfig {
             }
             Target = targetRaw;
 #ifdef _RES_DIR
-            std::cout << "Scene file at:"<< _RES_DIR + fileName << std::endl;
-            std::fstream fOut(_RES_DIR + fileName, std::ios::out | std::ios::trunc);
+            std::string filePath = _RES_DIR + fileName;
+            std::cout << "Scene file at:" << filePath << std::endl;
+            std::fstream fOut(filePath, std::ios::out | std::ios::trunc);
             for (auto& tmp : targetRaw) {
-                fOut << tmp.x() << ", " << tmp.y() << std::endl;
+                fOut << tmp.x() << ", " << tmp.y() << "\n";
             }
             fOut.close();
+            std::cout << "cp " + filePath + " ./" + iterDir + fileName<< std::endl;
+            system(("cp " + filePath + " ./" + iterDir + fileName).c_str());
 #endif
         }
         else {
