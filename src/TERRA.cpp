@@ -86,10 +86,11 @@ namespace TERRAConfig {
         return 0;
     }
 
-    int ProblemParam::ReadScene(const std::string& fileName) {
+    int ProblemParam::ReadScene(const std::string& fileName, const std::string& iterDir) {
         try {
 #ifdef _RES_DIR
-            std::fstream fIn(_RES_DIR + fileName, std::ios::in);
+            std::string filePath = _RES_DIR + fileName;
+            std::fstream fIn(filePath, std::ios::in);
             std::string curLine;
             double tmpx, tmpy;
             while (std::getline(fIn, curLine)) {
@@ -102,6 +103,9 @@ namespace TERRAConfig {
                 Target.push_back(Point_2(tmpx, tmpy));
             }
             fIn.close();
+            std::cout << "cp " + filePath + " ./" + iterDir + fileName<< std::endl;
+            system(("cp " + filePath + " ./" + iterDir + fileName).c_str());
+
 #endif
             std::cout << "--Read Scene: " << Target.size() << std::endl;
             for (auto& tmp : Target) {

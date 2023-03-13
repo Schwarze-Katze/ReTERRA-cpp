@@ -44,8 +44,8 @@ inline int TERRALaunch() {
         else {
             iterDir = configParam.saveDir;
         }
-        // problemParam.SceneGenerator("TestScene.in", iterDir);
-        problemParam.ReadScene("TestScene.in");
+        problemParam.SceneGenerator("TestScene.in", iterDir);
+        // problemParam.ReadScene("TestScene.in", iterDir);
         TERRA();
         std::cout << "Finished computing scenario " << iter << std::endl;
         ResultOutput(iterDir);
