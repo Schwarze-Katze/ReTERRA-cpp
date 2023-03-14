@@ -2,7 +2,8 @@
 #include <set>
 inline int initTERRAParam();
 inline int TERRALaunch();
-inline int ResultOutput(const std::string& iterDir);
+inline int CBSResultOutput(const std::string& iterDir);
+inline int VisualizeResultOutput(const std::string& iterDir);
 
 namespace TERRAConfig {
     ConfigParam configParam;
@@ -48,12 +49,13 @@ inline int TERRALaunch() {
         // problemParam.ReadScene("TestScene.in", iterDir);
         TERRA();
         std::cout << "Finished computing scenario " << iter << std::endl;
-        ResultOutput(iterDir);
+        CBSResultOutput(iterDir);
+        VisualizeResultOutput(iterDir);
     }
     return 0;
 }
 
-inline int ResultOutput(const std::string& iterDir) {
+inline int CBSResultOutput(const std::string& iterDir) {
     std::unordered_set < std::pair<int, int>, boost::hash<std::pair<int, int>>> scene, target;
     for (auto& tmp : TERRAConfig::problemParam.Target) {
         scene.insert(std::make_pair(int(tmp.x()), int(tmp.y())));
@@ -101,6 +103,25 @@ inline int ResultOutput(const std::string& iterDir) {
     //         fOut << tmpUAV.y() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
     //     }
     // }
+    fOut.close();
+    return 0;
+}
+
+inline int VisualizeResultOutput(const std::string& iterDir) {
+    YAML::Node visualize, schedule;
+    for (int i = 0; i < TERRAResult::pathSol.size();++i) {
+        auto& tmpUAV = TERRAResult::pathSol[i].uav2;
+        auto agentName = "agent" + std::to_string(i);
+        for (int j = 0; j < tmpUAV.size();++j) {
+            schedule[agentName][j]["x"] = tmpUAV[j].x();
+            schedule[agentName][j]["y"] = tmpUAV[j].y();
+            schedule[agentName][j]["z"] = 0;
+            schedule[agentName][j]["t"] = j;
+        }
+    }
+    visualize["schedule"] = schedule;
+    std::fstream fOut(iterDir + "Visualize.yaml", std::ios::out | std::ios::trunc);
+    fOut << visualize;
     fOut.close();
     return 0;
 }
