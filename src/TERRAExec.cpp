@@ -74,11 +74,17 @@ inline int CBSResultOutput(const std::string& iterDir) {
         auto& path = TERRAResult::pathSol[i];
         YAML::Node agent;
         agent["name"] = "agent" + std::to_string(i);
-        std::vector<int> point = { int(path.ugv.x()),int(path.ugv.y()) };
-        agent["start"].push_back(point);
-        for (auto& tmp : path.uav2) {
-            point = { int(tmp.x()),int(tmp.y()) };
-            agent["potentialGoals"].push_back(point);
+        agent["start"].push_back(int(path.ugv.x()));
+        agent["start"].push_back(int(path.ugv.y()));
+        std::vector<int> point(2);
+        if (path.uav2.empty()) {
+            agent["potentialGoals"] = YAML::Null;
+        }
+        else {
+            for (auto& tmp : path.uav2) {
+                point = { int(tmp.x()),int(tmp.y()) };
+                agent["potentialGoals"].push_back(point);
+            }
         }
         agents.push_back(agent);
     }
