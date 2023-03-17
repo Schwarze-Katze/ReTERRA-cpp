@@ -45,8 +45,8 @@ inline int TERRALaunch() {
         else {
             iterDir = configParam.saveDir;
         }
-        // problemParam.SceneGenerator("TestScene.in", iterDir);
-        problemParam.ReadScene("TestScene.in", iterDir);
+        problemParam.SceneGenerator("TestScene.in", iterDir);
+        // problemParam.ReadScene("TestScene.in", iterDir);
         TERRA();
         std::cout << "Finished computing scenario " << iter << std::endl;
         CBSResultOutput(iterDir);
@@ -63,7 +63,7 @@ inline int CBSResultOutput(const std::string& iterDir) {
     YAML::Node config, map, agents;
     map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
     map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
-    for (int i = 0; i < 200;++i) {
+    for (int i = 0; i < 20;++i) {
         std::vector<int> obs(2);
         do {
             obs = { rand() % int(TERRAConfig::problemParam.AreaSize),rand() % int(TERRAConfig::problemParam.AreaSize) };
