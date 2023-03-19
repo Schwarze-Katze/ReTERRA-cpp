@@ -34,6 +34,7 @@
 build
 lkhUtils/OBJ
 tsp_solution.*
+LKH-3.0.8
 
 #vscode config
 .vscode

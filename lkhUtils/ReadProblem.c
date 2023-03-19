@@ -845,6 +845,9 @@ static void CheckSpecificationPart()
         !ThreeDWeightType() && MaxCandidates + ExtraCandidates > 0)
         eprintf
             ("Illegal EDGE_WEIGHT_TYPE for CANDIDATE_SET_TYPE = QUADRANT");
+    if (CandidateSetType == POPMUSIC && Asymmetric)
+        eprintf("CANDIDATE_SET_TYPE = POPMUSIC is not applicable for "
+                "asymetric problems");
     if (ExtraCandidateSetType == QUADRANT && !TwoDWeightType() &&
         !ThreeDWeightType() && ExtraCandidates > 0)
         eprintf
@@ -1381,7 +1384,7 @@ static void Read_EDGE_WEIGHT_SECTION()
                 W = round(Scale * w);
                 NodeSet[j].C[i] = W;
                 if (Asymmetric) {
-                    NodeSet[j].C[i] = W;
+                    NodeSet[i].C[j] = W;
                     if (W > M)
                         M = W;
                 }
@@ -1603,7 +1606,7 @@ static void Read_FIXED_EDGES_SECTION()
     int i, j, Count = 0;
 
     CheckSpecificationPart();
-if (!FirstNode)
+    if (!FirstNode)
         CreateNodes();
     if (ProblemType == HPP)
         Dimension--;

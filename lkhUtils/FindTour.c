@@ -49,9 +49,11 @@ GainType FindTour()
         CurrentPenalty = BetterPenalty = Penalty ? Penalty() : 0;
     }
     for (Trial = 1; Trial <= MaxTrials; Trial++) {
-        if (GetTime() - StartTime >= TimeLimit) {
+        if (GetTime() - EntryTime >= TimeLimit ||
+            GetTime() - StartTime >= TotalTimeLimit) {
             if (TraceLevel >= 1)
                 printff("*** Time limit exceeded ***\n");
+            Trial--;
             break;
         }
         /* Choose FirstNode at random */
@@ -65,19 +67,22 @@ GainType FindTour()
             (InitialTourAlgorithm != SOP_ALG || Trial > 1))
             SOP_RepairTour();
         Cost = LinKernighan();
-        if (FirstNode->BestSuc && !TSPTW_Makespan) {
-            /* Merge tour with current best tour */
-            t = FirstNode;
-            while ((t = t->Next = t->BestSuc) != FirstNode);
-            Cost = MergeWithTour();
-        }
-        if (Dimension == DimensionSaved && Cost >= OrdinalTourCost &&
-            BetterCost > OrdinalTourCost && !TSPTW_Makespan) {
-            /* Merge tour with ordinal tour */
-            for (i = 1; i < Dimension; i++)
-                NodeSet[i].Next = &NodeSet[i + 1];
-            NodeSet[Dimension].Next = &NodeSet[1];
-            Cost = MergeWithTour();
+        if (GetTime() - EntryTime < TimeLimit &&
+            GetTime() - StartTime < TotalTimeLimit) {
+            if (FirstNode->BestSuc && !TSPTW_Makespan) {
+                /* Merge tour with current best tour */
+                t = FirstNode;
+                while ((t = t->Next = t->BestSuc) != FirstNode);
+                Cost = MergeWithTour();
+            }
+            if (Dimension == DimensionSaved && Cost >= OrdinalTourCost &&
+                BetterCost > OrdinalTourCost && !TSPTW_Makespan) {
+                /* Merge tour with ordinal tour */
+                for (i = 1; i < Dimension; i++)
+                    NodeSet[i].Next = &NodeSet[i + 1];
+                NodeSet[Dimension].Next = &NodeSet[1];
+                Cost = MergeWithTour();
+            }
         }
         if (CurrentPenalty < BetterPenalty ||
             (CurrentPenalty == BetterPenalty && Cost < BetterCost)) {

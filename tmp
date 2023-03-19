@@ -1,0 +1,10 @@
+int LKHmain(const char *argv)
+{
+    GainType Cost, OldOptimum;
+    double Time, LastTime;
+    Node *N;
+    int i;
+
+    /* Read the specification of the problem */
+    ParameterFileName = argv;
+    ReadParameters();

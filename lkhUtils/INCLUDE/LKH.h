@@ -241,7 +241,7 @@ extern Node *Depot;
 extern int Dimension;          /* Number of nodes in the problem */
 extern int DimensionSaved;     /* Saved value of Dimension */
 extern int Dim;                /* DimensionSaved - Salesmen + 1 */
-extern double DistanceLimit;   /* Maxixim route distance for a CVRP instance */
+extern double DistanceLimit;   /* Maximum route distance for a CVRP instance */
 extern double Excess;          /* Maximum alpha-value allowed for any 
                                   candidate edge is set to Excess times the 
                                   absolute value of the lower bound of a 
@@ -347,7 +347,8 @@ extern int SubsequentPatching; /* Species whether patching is used for
 extern SwapRecord *SwapStack;  /* Stack of SwapRecords */
 extern int Swaps;      /* Number of swaps made during a tentative move */
 extern int OldSwaps;   /* Saved number of swaps */
-extern double TimeLimit;       /* The time limit in seconds */
+extern double TimeLimit;       /* Time limit in seconds for each run */
+extern double TotalTimeLimit;  /* Total time limit in seconds */
 extern int TotalDemand;        /* Sum of demands for a CVRP instance */
 extern int TraceLevel; /* Specifies the level of detail of the output 
                           given during the solution process. 

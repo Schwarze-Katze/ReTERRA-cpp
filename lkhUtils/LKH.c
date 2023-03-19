@@ -39,7 +39,7 @@ Node *Depot;
 int Dimension;          /* Number of nodes in the problem */
 int DimensionSaved;     /* Saved value of Dimension */
 int Dim;                /* DimensionSaved - Salesmen + 1 */
-double DistanceLimit;   /* Maxixim route distance for a CVRP instance */
+double DistanceLimit;   /* Maximum route distance for a CVRP instance */
 double Excess;          /* Maximum alpha-value allowed for any 
                            candidate edge is set to Excess times the 
                            absolute value of the lower bound of a 
@@ -145,7 +145,8 @@ int SubsequentPatching; /* Species whether patching is used for
 SwapRecord *SwapStack;  /* Stack of SwapRecords */
 int Swaps;      /* Number of swaps made during a tentative move */
 int OldSwaps;   /* Saved number of swaps */
-double TimeLimit;       /* The time limit in seconds */
+double TimeLimit;       /* Time limit in seconds for each run */
+double TotalTimeLimit;  /* Total time limit in seconds */
 int TotalDemand;        /* Sum of demands for a CVRP instance */
 int TraceLevel; /* Specifies the level of detail of the output 
                    given during the solution process. 

@@ -416,7 +416,11 @@
  * Default: YES
  *
  * TIME_LIMIT = <real>
- * Specifies a time limit in seconds.
+ * Specifies a time limit in seconds for each run.
+ * Default: DBL_MAX
+ *
+ * TOTAL_TIME_LIMIT = <real>
+ * Specifies a total time limit in seconds.
  * Default: DBL_MAX
  *
  * TOUR_FILE = <string>
@@ -562,6 +566,7 @@ void ReadParameters()
     SubsequentMoveTypeSpecial = 0;
     SubsequentPatching = 1;
     TimeLimit = DBL_MAX;
+    TotalTimeLimit = DBL_MAX;
     TraceLevel = 1;
     TSPTW_Makespan = 0;
 
@@ -1142,6 +1147,12 @@ void ReadParameters()
                 eprintf("TIME_LIMIT: real expected");
             if (TimeLimit < 0)
                 eprintf("TIME_LIMIT: >= 0 expected");
+        } else if (!strcmp(Keyword, "TOTAL_TIME_LIMIT")) {
+            if (!(Token = strtok(0, Delimiters)) ||
+                !sscanf(Token, "%lf", &TotalTimeLimit))
+                eprintf("TOTAL_TIME_LIMIT: real expected");
+            if (TimeLimit < 0)
+                eprintf("TOTAL_TIME_LIMIT: >= 0 expected");
         } else if (!strcmp(Keyword, "TOUR_FILE")) {
             if (!(TourFileName = GetFileName(0)))
                 eprintf("TOUR_FILE: string expected");
@@ -1162,6 +1173,8 @@ void ReadParameters()
         eprintf("SUBPROBLEM_TOUR_FILE specification is missing");
     if (SubproblemSize > 0 && Salesmen > 1)
         eprintf("SUBPROBLEM specification not possible for SALESMEN > 1");
+    if (CandidateSetType != DELAUNAY)
+        DelaunayPure = 0;
     fclose(ParameterFile);
     free(LastLine);
     LastLine = 0;

@@ -14,5 +14,5 @@ inline void WriteTSPLibFile(const string& fileName, const MatrixXd& costMatrix);
 inline VectorXi ReadSolution(const string& fileName);
 
 extern "C" {
-    int LKHmain(const char* ParameterFileName);
+    int LKHmain(int argc, char* argv[]);
 }

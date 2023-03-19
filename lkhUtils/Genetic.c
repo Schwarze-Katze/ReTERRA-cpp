@@ -2,7 +2,7 @@
 #include "Genetic.h"
 
 /*
- * The AddToPopulation function adds the current tour as an individual to 
+ * The AddToPopulation function adds the current tour as an individual to
  * the population. The fitness of the individual is set equal to the cost
  * of the tour. The population is kept sorted in increasing fitness order.
  */
@@ -226,8 +226,8 @@ void ReplaceIndividualWithTour(int i, GainType Penalty, GainType Cost)
 }
 
 /* 
- * The DistanceToIndividual returns the number of different edges between 
- * the tour (given by OldSuc) and individual i. 
+ * The DistanceToIndividual returns the number of different edges between
+ * the tour (given by OldSuc) and individual i.
  */
 
 static int DistanceToIndividual(int i)

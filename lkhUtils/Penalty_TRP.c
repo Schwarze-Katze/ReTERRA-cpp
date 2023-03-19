@@ -4,7 +4,7 @@
 GainType Penalty_TRP()
 {
     static Node *StartRoute = 0;
-    Node *N, *NextN, *CurrentRoute;;
+    Node *N, *NextN, *CurrentRoute;
     GainType P = 0, DistanceSum;
     int Forward = SUCC(Depot)->Id != Depot->Id + DimensionSaved;
 
@@ -18,24 +18,21 @@ GainType Penalty_TRP()
         DistanceSum = 0;
         do {
             NextN = Forward ? SUCC(N) : PREDD(N);
-            if (N->Id <= Dim || N->DepotId) {
-                if (NextN->DepotId == 0) {
-                    DistanceSum += (C(N, NextN) - N->Pi - NextN->Pi) /
-                        Precision;
-                    DistanceSum += NextN->ServiceTime;
-                    P += DistanceSum;
-                    if (P > CurrentPenalty ||
-                        (P == CurrentPenalty && CurrentGain <= 0)) {
-                        StartRoute = CurrentRoute;
-                        return CurrentPenalty + (CurrentGain > 0);
-                    }
-                    if (DistanceSum > DistanceLimit &&
-                        ((P +=
-                          DistanceSum - DistanceLimit) > CurrentPenalty
-                         || (P == CurrentPenalty && CurrentGain <= 0))) {
-                        StartRoute = CurrentRoute;
-                        return CurrentPenalty + (CurrentGain > 0);
-                    }
+            if (NextN->DepotId == 0 &&
+                (N->Id <= Dim || N->DepotId)) {
+                DistanceSum += (C(N, NextN) - N->Pi - NextN->Pi) / Precision;
+                DistanceSum += NextN->ServiceTime;
+                P += DistanceSum;
+                if (P > CurrentPenalty ||
+                    (P == CurrentPenalty && CurrentGain <= 0)) {
+                    StartRoute = CurrentRoute;
+                    return CurrentPenalty + (CurrentGain > 0);
+                }
+                if (DistanceSum > DistanceLimit &&
+                    ((P += DistanceSum - DistanceLimit) > CurrentPenalty ||
+                     (P == CurrentPenalty && CurrentGain <= 0))) {
+                    StartRoute = CurrentRoute;
+                    return CurrentPenalty + (CurrentGain > 0);
                 }
             }
             N = Forward ? SUCC(NextN) : PREDD(NextN);

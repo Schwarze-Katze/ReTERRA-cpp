@@ -174,10 +174,10 @@ int TERRA() {
     std::cout << solutionSetsLabelsV << std::endl;
     // Check If Home is a vertex of the solution
     vector<Point_2> V3 = CheckHome(V2);
-    // std::cout << "--V3: " << V3.size() << std::endl;
-    // for (auto& tmp : V3) {
-    //     std::cout << tmp << std::endl;
-    // }
+    std::cout << "--V3: " << V3.size() << std::endl;
+    for (auto& tmp : V3) {
+        std::cout << tmp << std::endl;
+    }
     double ugvDist, ugvTime, uavDist, uavTime;
     int uavStop;
     std::vector<Point_2> ugvPath;
@@ -210,6 +210,7 @@ int TERRA() {
         else if (TERRAConfig::problemParam.Gp == "MedianCenter"){
             avg = { Eigen::median(V3Mat.row(0)), Eigen::median(V3Mat.row(1)) };
         }
+        std::cout << "--avg: " << avg << std::endl;
         std::vector<Point_2> VOpt, VRes;
         GravitationalOptimization(V1,avg,coveredTarget,solutionSetsLabelsV,setCoverTable,VOpt,VRes);
         //Genetic Algorithm to UGV Path

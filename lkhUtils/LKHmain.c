@@ -6,15 +6,15 @@
  * This file contains the main function of the program.
  */
 
-int LKHmain(const char *argv)
-{
+int LKHmain(int argc, char* argv[]) {
     GainType Cost, OldOptimum;
     double Time, LastTime;
-    Node *N;
+    Node* N;
     int i;
 
     /* Read the specification of the problem */
-    ParameterFileName = argv;
+    if (argc >= 2)
+        ParameterFileName = argv[1];
     ReadParameters();
     StartTime = LastTime = GetTime();
     MaxMatrixDimension = 20000;
@@ -71,9 +71,10 @@ int LKHmain(const char *argv)
 
     for (Run = 1; Run <= Runs; Run++) {
         LastTime = GetTime();
-        if (LastTime - StartTime >= TimeLimit) {
+        if (LastTime - StartTime >= TotalTimeLimit) {
             if (TraceLevel >= 1)
                 printff("*** Time limit exceeded ***\n");
+            Run--;
             break;
         }
         Cost = FindTour();      /* using the Lin-Kernighan heuristic */
@@ -88,11 +89,11 @@ int LKHmain(const char *argv)
                     (CurrentPenalty < OldPenalty ||
                      (CurrentPenalty == OldPenalty && Cost < OldCost))) {
                     if (CurrentPenalty)
-                        printff("  Merged with %d: Cost = " GainFormat,
-                                i + 1, Cost);
-                    else
                         printff("  Merged with %d: Cost = " GainFormat "_"
                                 GainFormat, i + 1, CurrentPenalty, Cost);
+                    else
+                        printff("  Merged with %d: Cost = " GainFormat,
+                                i + 1, Cost);
                     if (Optimum != MINUS_INFINITY && Optimum != 0) {
                         if (ProblemType != CCVRP && ProblemType != TRP &&
                             ProblemType != MLP &&
@@ -181,8 +182,7 @@ int LKHmain(const char *argv)
                     AddCandidate(N->Suc, N, d, INT_MAX);
                 }
                 N = N->InitialSuc = N->Suc;
-            }
-            while (N != FirstNode);
+            } while (N != FirstNode);
         }
         SRandom(++Seed);
     }
