@@ -6,10 +6,11 @@
  * This file contains the main function of the program.
  */
 
-int LKHmain(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     GainType Cost, OldOptimum;
     double Time, LastTime;
-    Node* N;
+    Node *N;
     int i;
 
     /* Read the specification of the problem */

@@ -213,8 +213,20 @@ int TERRA() {
         std::cout << "--avg: " << avg << std::endl;
         std::vector<Point_2> VOpt, VRes;
         GravitationalOptimization(V1,avg,coveredTarget,solutionSetsLabelsV,setCoverTable,VOpt,VRes);
+        std::cout << "--VOpt: " << VOpt.size() << std::endl;
+        for (auto& tmp : VOpt) {
+            std::cout << tmp << std::endl;
+        }
+        std::cout << "--VRes: " << VRes.size() << std::endl;
+        for (auto& tmp : VRes) {
+            std::cout << tmp << std::endl;
+        }
         //Genetic Algorithm to UGV Path
         tspGaUgv(VOpt, ugvDist, ugvPath, rte);
+        std::cout << "--ugvPath: " << ugvPath.size() << std::endl;
+        for (auto& tmp : ugvPath) {
+            std::cout << tmp << std::endl;
+        }
         ugvTime = ugvDist / TERRAConfig::ugvData.Vugv;
         //Search Algorithm to UAV Path
         UAVComputePath(coveredTarget, setCoverTable, solutionSetsLabelsV, VRes, ugvPath, uavPath1, uavPath2, uavDist, uavTime, uavStop);

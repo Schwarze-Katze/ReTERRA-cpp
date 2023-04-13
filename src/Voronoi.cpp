@@ -109,6 +109,8 @@ int VoronoiCoveringTimeOptimize(vector<Point_2>& V1, vector<Point_2>& coveredTar
         }
     }
     std::sort(V1.begin(), V1.end());
+    // auto endPos = std::unique(V1.begin(), V1.end(), isUnique);
+    // V1.resize(endPos - V1.begin());
     return 0;
 }
 

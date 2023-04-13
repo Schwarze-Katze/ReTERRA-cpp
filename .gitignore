@@ -32,9 +32,9 @@
 *.app
 
 build
-lkhUtils/OBJ
 tsp_solution.*
-LKH-3.0.8
+LKH-3.0.8/OBJ
+lkhUtils
 
 #vscode config
 .vscode

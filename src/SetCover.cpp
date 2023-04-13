@@ -22,7 +22,7 @@
 // 	F. Gori, G. Folino, M.S.M. Jetten, E. Marchiori
 // 	"MTR: Taxonomic annotation of short metagenomic reads using clustering at multiple taxonomic ranks", Bioinformatics 2010.
 // 	doi = 10.1093/bioinformatics/btq649 
-int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2, MatrixXi& setCoverTable, VectorXi &solutionSetsLabelsV) {
+int GreedySetCovering(const std::vector<Point_2>& V1, const std::vector<Point_2>& coveredTarget, std::vector<Point_2>& V2, MatrixXi& setCoverTable, VectorXi& solutionSetsLabelsV) {
     const int tlen = coveredTarget.size(), vlen = V1.size();
     //vector<vector<bool>> setCoverTable(tlen);
     
@@ -78,12 +78,12 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
     auto& A = setCoverTable_s;
     VectorXi setsLabelsV = Eigen::Map<VectorXi>(Lp.data(), Lp.size());
     MatrixXi solutionA;
-    // std::cout << "--A1: " << A.rows() << ',' << A.cols() << std::endl;
-    // std::cout << A << std::endl;
-    // std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
-    // std::cout << setsCardinalitiesV << std::endl;
-    // std::cout << "--setsCardinalitiesL: " << setsCardinalitiesL.rows() << ',' << setsCardinalitiesL.cols() << std::endl;
-    // std::cout << setsCardinalitiesL << std::endl;
+    std::cout << "--A1: " << A.rows() << ',' << A.cols() << std::endl;
+    std::cout << A << std::endl;
+    std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
+    std::cout << setsCardinalitiesV << std::endl;
+    std::cout << "--setsCardinalitiesL: " << setsCardinalitiesL.rows() << ',' << setsCardinalitiesL.cols() << std::endl;
+    std::cout << setsCardinalitiesL << std::endl;
     SetCoveringProblem(A, setsLabelsV, setsCardinalitiesV, setsCardinalitiesL, solutionA, solutionSetsLabelsV);
     for (int i = 0;i < vlen;++i) {
         for (int j = 0;j < solutionSetsLabelsV.size();++j) {
@@ -95,7 +95,7 @@ int GreedySetCovering(std::vector<Point_2>& V1, std::vector<Point_2>& coveredTar
     return 0;
 }
 
-int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardinalitiesV, VectorXi& setsCardinalitiesL, MatrixXi& solutionA, VectorXi &solutionSetsLabelsV) {
+int SetCoveringProblem(MatrixXi A, VectorXi setsLabelsV, VectorXi setsCardinalitiesV, VectorXi setsCardinalitiesL, MatrixXi& solutionA, VectorXi& solutionSetsLabelsV) {
     //Identify elements covered by just one set and select them
     vector<int> UniquelyCoveredL;
     for (int i = 0;i < setsCardinalitiesL.size();++i) {
@@ -118,15 +118,21 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
                 notToBeSelectedL.push_back(i);
             }
         }
-        //solution_A = A(:, toBeSelectL) ;
         solutionA = A(all, toBeSelectedL);
         solutionSetsLabelsV = setsLabelsV(toBeSelectedL);
         A = A(all, notToBeSelectedL).eval();
-        // std::cout << "--A2: " << A.rows() << ',' << A.cols() << std::endl;
-        // std::cout << A << std::endl;
+        std::cout << "--A2: " << A.rows() << ',' << A.cols() << std::endl;
+        std::cout << A << std::endl;
+        std::cout << "--solutionSetsLabelsV: " << solutionSetsLabelsV.rows() << ',' << solutionSetsLabelsV.cols() << std::endl;
+        std::cout << solutionSetsLabelsV << std::endl;
         setsLabelsV = setsLabelsV(notToBeSelectedL).eval();
         setsCardinalitiesV = setsCardinalitiesV(notToBeSelectedL).eval();
         remainingElementsL = (solutionA.rowwise().sum().array() == 0).cast<int>();
+        std::cout << "--remainingElementsL: " << remainingElementsL.rows() << ',' << remainingElementsL.cols() << std::endl;
+        std::cout << remainingElementsL << std::endl;
+        std::cout << "--setsLabelsV: " << setsLabelsV.rows() << ',' << setsLabelsV.cols() << std::endl;
+        std::cout << setsLabelsV << std::endl;
+
     }
     else {
         remainingElementsL.resize(A.rows());
@@ -136,14 +142,17 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
         VectorXi sortedIndexVector(setsCardinalitiesV.size());
         std::iota(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), 0);
         std::stable_sort(sortedIndexVector.data(), sortedIndexVector.data() + sortedIndexVector.size(), [&](int i, int j) {return setsCardinalitiesV(i) > setsCardinalitiesV(j);});
-        // std::cout << "--sortedIndexVector: " << sortedIndexVector.rows() << ',' << sortedIndexVector.cols() << std::endl;
-        // std::cout << sortedIndexVector << std::endl;
+        std::cout << "--sortedIndexVector: " << sortedIndexVector.rows() << ',' << sortedIndexVector.cols() << std::endl;
+        std::cout << sortedIndexVector << std::endl;
         std::sort(setsCardinalitiesV.data(), setsCardinalitiesV.data() + setsCardinalitiesV.size(), std::greater<int>());
+        std::cout << "--setsCardinalitiesV: " << setsCardinalitiesV.rows() << ',' << setsCardinalitiesV.cols() << std::endl;
+        std::cout << setsCardinalitiesV << std::endl;
         setsLabelsV = setsLabelsV(sortedIndexVector).eval();
-        
-        A = A(all, setsLabelsV).eval();
-        // std::cout << "--A3: " << A.rows() << ',' << A.cols() << std::endl;
-        // std::cout << A << std::endl;
+        std::cout << "--setsLabelsV: " << setsLabelsV.rows() << ',' << setsLabelsV.cols() << std::endl;
+        std::cout << setsLabelsV << std::endl;
+        A = A(all, sortedIndexVector).eval();
+        std::cout << "--A3: " << A.rows() << ',' << A.cols() << std::endl;
+        std::cout << A << std::endl;
 
         while (remainingElementsL.count()) {
             int thresholdN = 0;
@@ -161,14 +170,14 @@ int SetCoveringProblem(MatrixXi& A, VectorXi& setsLabelsV, VectorXi& setsCardina
             std::cout << "--intV: " << intV.rows() << ',' << intV.cols() << std::endl << intV << std::endl;
             int selectedSetPosN;
             intV.maxCoeff(&selectedSetPosN);
-            // std::cout << "--focusedSetsA: " << focusedSetsA.rows() << ',' << focusedSetsA.cols() << std::endl;
-            // std::cout << focusedSetsA << std::endl;
-            // std::cout << "--focusedLabelsV: " << focusedLabelsV.rows() << ',' << focusedLabelsV.cols() << std::endl;
-            // std::cout << focusedLabelsV << std::endl;
+            std::cout << "--focusedSetsA: " << focusedSetsA.rows() << ',' << focusedSetsA.cols() << std::endl;
+            std::cout << focusedSetsA << std::endl;
+            std::cout << "--focusedLabelsV: " << focusedLabelsV.rows() << ',' << focusedLabelsV.cols() << std::endl;
+            std::cout << focusedLabelsV << std::endl;
             solutionA.conservativeResize(focusedSetsA.rows(), solutionA.cols() + 1);
             solutionA(all, last) = focusedSetsA(all, selectedSetPosN);
-            // std::cout << "--solutionA: " << solutionA.rows() << ',' << solutionA.cols() << std::endl;
-            // std::cout << solutionA << std::endl;
+            std::cout << "--solutionA: " << solutionA.rows() << ',' << solutionA.cols() << std::endl;
+            std::cout << solutionA << std::endl;
             solutionSetsLabelsV.conservativeResize(solutionSetsLabelsV.size() + 1);
             solutionSetsLabelsV(solutionSetsLabelsV.size() - 1) = focusedLabelsV(selectedSetPosN);
             remainingElementsL = (remainingElementsL.eval().array().cast<bool>() && !(focusedSetsA(all, selectedSetPosN).array().cast<bool>())).cast<int>();

@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.1)
 project(reTERRA)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # set(CMAKE_EXE_LINKER_FLAGS " -static")
 
 add_definitions(-D_RES_DIR="${PROJECT_SOURCE_DIR}/src/")#Pregenerated test scene file location
+add_definitions(-D_LKH_DIR="${PROJECT_SOURCE_DIR}/LKH-3.0.8/OBJ/")#Pregenerated LKH solver exec location
 
 #This project requires CGAL
 find_package(CGAL REQUIRED QUIET OPTIONAL_COMPONENTS Core)
@@ -47,8 +48,8 @@ pkg_check_modules(YAMLCPP yaml-cpp REQUIRED)
 if(YAMLCPP_VERSION VERSION_GREATER "0.5.0")
     add_definitions(-DHAVE_YAMLCPP_GT_0_5_0)
 endif()
-# Add this line if liblkhUtils.a is missing or broken
-add_subdirectory(lkhUtils ${PROJECT_SOURCE_DIR}/lkhUtils/OBJ)
+# Add this line if lkh solver is missing or broken
+add_subdirectory(LKH-3.0.8 ${PROJECT_SOURCE_DIR}/LKH-3.0.8/OBJ)
 
 
 include_directories(
@@ -70,7 +71,8 @@ add_executable(${PROJECT_NAME}
 
 # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_START_STATIC ON)
 # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_SEARCH_END_STATIC ON)
-target_link_libraries(${PROJECT_NAME} lkhUtils)
+# target_link_libraries(${PROJECT_NAME} lkhUtils)
+target_link_libraries(${PROJECT_NAME} pthread)
 target_link_libraries(${PROJECT_NAME} ${CGAL_LIBRARIES})
 # target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})

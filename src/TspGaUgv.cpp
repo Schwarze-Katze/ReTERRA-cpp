@@ -1,6 +1,6 @@
 #include "TspGaUgv.h"
 
-int tspGaUgv(vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, VectorXi& rte) {
+int tspGaUgv(const vector<Point_2>& V3, double& minDist, vector<Point_2>& UGVPath, VectorXi& rte) {
     auto popSize = ugvData.PopulationSize;
     auto eliteP = ugvData.EliteProbability;
     auto muteRate = ugvData.MutationRate;

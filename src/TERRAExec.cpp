@@ -29,7 +29,7 @@ inline int initTERRAParam() {
     configParam = ConfigParam(1, true, true, false, "");
     problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200, "GravityCenter");
     ugvData = UGVData(0.4, 430, 9, 2, 0.06, 2, 2.7);
-    uavData = UAVData(308, 1, 4, 4);
+    uavData = UAVData(308, 0.5, 4, 4);
     return 0;
 }
 

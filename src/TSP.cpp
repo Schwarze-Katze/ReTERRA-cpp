@@ -30,14 +30,8 @@ VectorXi LKH_TSP(const MatrixXd& costMatrix, double costMatrixMulFactor, const s
     MatrixXd costMatrix4Tsp = costMatrixMulFactor * costMatrix;
     costMatrix4Tsp.unaryExpr<double(*)(double)>(&floor);
     WriteTSPLibFile(fileName, costMatrix4Tsp);
-    char* program = "lkhTest";
-    char name[100];
-    strcpy(name, (fileName + ".par").c_str());
-    char** names = new char* [3];
-    names[0] = program;
-    names[1] = name;
-    LKHmain(2, names);
-    delete[] names;
+    std::cout << (std::string(_LKH_DIR) + "lkhExec " + fileName + ".par") << std::endl;
+    system((std::string(_LKH_DIR) + "lkhExec " + fileName + ".par").c_str());
     return ReadSolution((fileName + ".txt").c_str());
 }
 

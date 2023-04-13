@@ -1,7 +1,11 @@
 #include "GravitationalOptimization.h"
 
-int GravitationalOptimization(const vector<Point_2>& V1, const Point_2& avg, const vector<Point_2>& coveredTarget, const Eigen::VectorXi& solutionSetsLabelsV, const  MatrixXi& setCoverTable, vector<Point_2>& VOpt, vector<Point_2>& VRes) {
-    auto coveredTmp = coveredTarget;
+int GravitationalOptimization(const vector<Point_2>& V1, const Point_2& avg, const vector<Point_2>& coveredTarget, VectorXi solutionSetsLabelsV,  MatrixXi setCoverTable, vector<Point_2>& VOpt, vector<Point_2>& VRes) {
+    std::vector<bool> coveredTmp(coveredTarget.size(), true);
+    std::cout << "--coveredTarget: " << coveredTarget.size() << std::endl;
+    for (auto& tmp : coveredTarget) {
+        std::cout << tmp << std::endl;
+    }
     VOpt.clear();
     VOpt.push_back(TERRAConfig::problemParam.Home);
     VRes.resize(setCoverTable.cols());
@@ -12,16 +16,21 @@ int GravitationalOptimization(const vector<Point_2>& V1, const Point_2& avg, con
                 Point_2 pm = V1[i], pSol;
                 if (!isSamePoint(pm, avg)) {
                     for (int j = 0;j < setCoverTable.rows();++j) {
-                        if (setCoverTable(j, i) and coveredTmp[j].x() >-0.1) {
+                        if (setCoverTable(j, i) and coveredTmp[j]) {
                             pa.push_back(coveredTarget[j]);
-                            coveredTmp[j] = Point_2(-1, -1);
+                            coveredTmp[j] = false;
                         }
+                    }
+                    std::cout << "--pa: " << pa.size() << std::endl;
+                    for (auto& tmp : pa) {
+                        std::cout << tmp << std::endl;
                     }
                     pSol = FOptimus(pa, pm, avg);
                 }
                 else {
                     pSol = V1[i];
                 }
+                std::cout << "--pSol: " << pSol << std::endl;
                 if (!isinf(pSol.x()) and !isinf(pSol.y())) {
                     VOpt.push_back(pSol);
                 VRes[i] = pSol;
@@ -82,6 +91,7 @@ Point_2 FOptimus(const vector<Point_2>& pa, const Point_2& pm, const Point_2& av
         if (sqrt((tmp - avg).squared_length()) <= minDist) {
             minX = tmp.x();
             minY = tmp.y();
+            minDist = sqrt((tmp - avg).squared_length());
         }
     }
     return Point_2(minX, minY);

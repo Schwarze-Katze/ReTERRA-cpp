@@ -17,7 +17,7 @@ using Eigen::NoChange;
 using Eigen::Logical;
 
 int tspGaUgv(//1 input
-    vector<Point_2>& V3,
+    const vector<Point_2>& V3,
     //3 output
     double& minDist, vector<Point_2>& UGVPath, VectorXi& rte);
 

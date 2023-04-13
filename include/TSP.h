@@ -1,5 +1,6 @@
 #pragma once
 #include "TERRAUtility.h"
+#include <thread>
 
 using std::vector;
 using std::string;
@@ -13,6 +14,6 @@ VectorXi LKH_TSP(const MatrixXd& costMatrix, double CostMatrixMulFactor, const s
 inline void WriteTSPLibFile(const string& fileName, const MatrixXd& costMatrix);
 inline VectorXi ReadSolution(const string& fileName);
 
-extern "C" {
-    int LKHmain(int argc, char* argv[]);
-}
+// extern "C" {
+//     int LKHmain(int argc, char* argv[]);
+// }
