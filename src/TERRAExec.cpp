@@ -27,7 +27,7 @@ int main() {
 inline int initTERRAParam() {
     using namespace TERRAConfig;
     configParam = ConfigParam(1, true, true, false, "");
-    problemParam = ProblemParam(20, 0, 1, 0.5, 0.5, 200, "GravityCenter");
+    problemParam = ProblemParam(100, 0, 1, 0.5, 0.5, 200, "");
     ugvData = UGVData(0.4, 430, 9, 2, 0.06, 2, 2.7);
     uavData = UAVData(308, 0.5, 4, 4);
     return 0;
@@ -45,8 +45,8 @@ inline int TERRALaunch() {
         else {
             iterDir = configParam.saveDir;
         }
-        // problemParam.SceneGenerator("TestScene.in", iterDir);
-        problemParam.ReadScene("TestScene.in", iterDir);
+        problemParam.SceneGenerator("TestScene.in", iterDir);
+        // problemParam.ReadScene("TestScene.in", iterDir);
         TERRA();
         std::cout << "Finished computing scenario " << iter << std::endl;
         CBSResultOutput(iterDir);
@@ -57,15 +57,49 @@ inline int TERRALaunch() {
 
 inline int CBSResultOutput(const std::string& iterDir) {
     std::unordered_set < std::pair<int, int>, boost::hash<std::pair<int, int>>> scene, target;
+    auto pathSol = TERRAResult::pathSol;
+    auto GetMinimumPoint = [](const std::vector<TERRAResult::PathSolution>& paths) {
+        double minx = 0, miny = 0;
+        for (auto& path : paths) {
+            minx = std::min(minx, path.ugv.x());
+            miny = std::min(miny, path.ugv.y());
+            for (auto& p : path.uav2) {
+                minx = std::min(minx, p.x());
+                miny = std::min(miny, p.y());
+            }
+        }
+        return Point_2(minx, miny);
+    };
+    auto GetMaximumPoint = [](const std::vector<TERRAResult::PathSolution>& paths) {
+        double maxx = 0, maxy = 0;
+        for (auto& path : paths) {
+            maxx = std::max(maxx, path.ugv.x());
+            maxy = std::max(maxy, path.ugv.y());
+            for (auto& p : path.uav2) {
+                maxx = std::max(maxx, p.x());
+                maxy = std::max(maxy, p.y());
+            }
+        }
+        return Point_2(maxx, maxy);
+    };
+    Point_2 minimumPoint = GetMinimumPoint(pathSol), maximunPoint = GetMaximumPoint(pathSol);
     for (auto& tmp : TERRAConfig::problemParam.Target) {
-        scene.insert(std::make_pair(int(tmp.x()), int(tmp.y())));
+        scene.insert(std::make_pair(int(tmp.x() - minimumPoint.x()), int(tmp.y() - minimumPoint.y())));
     }
-    for (auto& tmp : TERRAResult::pathSol) {
+    for (auto& path : pathSol) {
+        auto tmpP = path.ugv - minimumPoint;
+        path.ugv = Point_2(tmpP.x(), tmpP.y());
+        for (auto &p : path.uav2) {
+            auto tmpP = p - minimumPoint;
+            p = Point_2(tmpP.x(), tmpP.y());
+        }
+    }
+    for (auto& tmp : pathSol) {
         target.insert(std::make_pair(int(tmp.ugv.x()), int(tmp.ugv.y())));
     }
     YAML::Node config, map, agents;
-    map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
-    map["dimensions"].push_back(TERRAConfig::problemParam.AreaSize);
+    map["dimensions"].push_back(minimumPoint.x() < 0 ? int(std::ceil(maximunPoint.x() - minimumPoint.x())) : int(std::ceil(maximunPoint.x())));
+    map["dimensions"].push_back(minimumPoint.y() < 0 ? int(std::ceil(maximunPoint.y() - minimumPoint.y())) : int(std::ceil(maximunPoint.y())));;
     for (int i = 0; i < 20;++i) {
         std::vector<int> obs(2);
         do {
@@ -73,46 +107,42 @@ inline int CBSResultOutput(const std::string& iterDir) {
         } while (scene.count(std::make_pair(obs[0], obs[1])) or target.count(std::make_pair(obs[0], obs[1])));
         map["obstacles"].push_back(obs);
     }
-    for (int i = 0;i < TERRAResult::pathSol.size();++i) {
-        auto& path = TERRAResult::pathSol[i];
-        YAML::Node agent;
-        agent["name"] = "agent" + std::to_string(i);
-        agent["start"].push_back(int(path.ugv.x()));
-        agent["start"].push_back(int(path.ugv.y()));
-        std::vector<int> point(2);
-        if (path.uav2.empty()) {
-            agent["potentialGoals"] = YAML::Null;
-        }
-        else {
-            for (auto& tmp : path.uav2) {
-                point = { int(tmp.x()),int(tmp.y()) };
+    bool isdone = false;
+    int idx = 0;
+    while (!isdone) {
+        isdone = true;
+        for (int i = 0;i < pathSol.size();++i) {
+            auto& path = pathSol[i];
+            YAML::Node agent;
+            agent["name"] = "agent" + std::to_string(i);
+            if (idx < int(path.uav2.size()) - 1) {
+                agent["start"].push_back(int(path.uav2[idx].x()));
+                agent["start"].push_back(int(path.uav2[idx].y()));
+                isdone = false;
+            }
+            else {
+                agent["start"].push_back(int(path.uav2.back().x()));
+                agent["start"].push_back(int(path.uav2.back().y()));
+            }
+            std::vector<int> point(2);
+            if (idx >= path.uav2.size() - 1) {
+                agent["potentialGoals"] = YAML::Null;
+            }
+            else {
+                point = { int(path.uav2[idx + 1].x()),int(path.uav2[idx + 1].y()) };
                 agent["potentialGoals"].push_back(point);
             }
+            agents.push_back(agent);
         }
-        agents.push_back(agent);
+        config["map"] = map;
+        config["agents"] = agents;
+        std::fstream fOut(iterDir + "output" + std::to_string(idx) + ".yaml", std::ios::out | std::ios::trunc);
+        fOut << config;
+        fOut.close();/* code */
+        idx++;
+        agents = YAML::Null;
     }
-    config["map"] = map;
-    config["agents"] = agents;
-    std::fstream fOut(iterDir + "output.yaml", std::ios::out | std::ios::trunc);
-    fOut << config;
-    // std::fstream fOut(iterDir + "ugv.out", std::ios::out | std::ios::trunc);
-    // for (auto& tmp : TERRAResult::pathSol) {
-    //     fOut << tmp.ugv.x() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
-    // }
-    // for (auto& tmp : TERRAResult::pathSol) {
-    //     fOut << tmp.ugv.y() << (&tmp.ugv == &TERRAResult::pathSol.back().ugv ? "\n" : ", ");
-    // }
-    // fOut.close();
-    // fOut.open(iterDir + "uav.out", std::ios::out | std::ios::trunc);
-    // for (auto& tmpUGV : TERRAResult::pathSol) {
-    //     for (auto& tmpUAV : tmpUGV.uav2) {
-    //         fOut << tmpUAV.x() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
-    //     }
-    //     for (auto& tmpUAV : tmpUGV.uav2) {
-    //         fOut << tmpUAV.y() << (&tmpUAV == &tmpUGV.uav2.back() ? "\n" : ", ");
-    //     }
-    // }
-    fOut.close();
+    
     return 0;
 }
 
@@ -131,7 +161,7 @@ inline int VisualizeResultOutput(const std::string& iterDir) {
                 schedule[agentName][j]["x"] = tmpUAV[j].x();
                 schedule[agentName][j]["y"] = tmpUAV[j].y();
                 schedule[agentName][j]["z"] = 0;
-                schedule[agentName][j]["t"] = j;
+                schedule[agentName][j]["t"] = 0;
             }
             cnt++;
         }

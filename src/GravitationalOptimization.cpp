@@ -2,10 +2,10 @@
 
 int GravitationalOptimization(const vector<Point_2>& V1, const Point_2& avg, const vector<Point_2>& coveredTarget, VectorXi solutionSetsLabelsV,  MatrixXi setCoverTable, vector<Point_2>& VOpt, vector<Point_2>& VRes) {
     std::vector<bool> coveredTmp(coveredTarget.size(), true);
-    std::cout << "--coveredTarget: " << coveredTarget.size() << std::endl;
-    for (auto& tmp : coveredTarget) {
-        std::cout << tmp << std::endl;
-    }
+    // std::cout << "--coveredTarget: " << coveredTarget.size() << std::endl;
+    // for (auto& tmp : coveredTarget) {
+    //     std::cout << tmp << std::endl;
+    // }
     VOpt.clear();
     VOpt.push_back(TERRAConfig::problemParam.Home);
     VRes.resize(setCoverTable.cols());
@@ -21,16 +21,16 @@ int GravitationalOptimization(const vector<Point_2>& V1, const Point_2& avg, con
                             coveredTmp[j] = false;
                         }
                     }
-                    std::cout << "--pa: " << pa.size() << std::endl;
-                    for (auto& tmp : pa) {
-                        std::cout << tmp << std::endl;
-                    }
+                    // std::cout << "--pa: " << pa.size() << std::endl;
+                    // for (auto& tmp : pa) {
+                    //     std::cout << tmp << std::endl;
+                    // }
                     pSol = FOptimus(pa, pm, avg);
                 }
                 else {
                     pSol = V1[i];
                 }
-                std::cout << "--pSol: " << pSol << std::endl;
+                // std::cout << "--pSol: " << pSol << std::endl;
                 if (!isinf(pSol.x()) and !isinf(pSol.y())) {
                     VOpt.push_back(pSol);
                 VRes[i] = pSol;
@@ -52,13 +52,13 @@ Point_2 FOptimus(const vector<Point_2>& pa, const Point_2& pm, const Point_2& av
         cpa.push_back(CK::Point_2(pa[i].x(), pa[i].y()));
     }
     Line_2 line(cpm, cavg);
-    std::cout << "--Line: " << std::endl;
-    std::cout << "k=" << -CGAL::to_double(line.a() / line.b()) << ", b=" << -CGAL::to_double(line.c() / line.b()) << std::endl;
+    // std::cout << "--Line: " << std::endl;
+    // std::cout << "k=" << -CGAL::to_double(line.a() / line.b()) << ", b=" << -CGAL::to_double(line.c() / line.b()) << std::endl;
     vector<Point_2> intersect;
     for (auto& centre : cpa) {
         Circle_2 circle(centre, CGAL::square(TERRAConfig::problemParam.Radius));
-        std::cout << "--Circle: " << std::endl;
-        std::cout << '(' << CGAL::to_double(circle.center().x()) << ' ' << CGAL::to_double(circle.center().y()) << "), R=" << CGAL::sqrt(CGAL::to_double(circle.squared_radius())) << std::endl;
+        // std::cout << "--Circle: " << std::endl;
+        // std::cout << '(' << CGAL::to_double(circle.center().x()) << ' ' << CGAL::to_double(circle.center().y()) << "), R=" << CGAL::sqrt(CGAL::to_double(circle.squared_radius())) << std::endl;
         std::vector<IntersectionResult> ans;
         CGAL::intersection(line, circle, std::back_inserter(ans));
         for (const auto& elem : ans) {
@@ -66,7 +66,7 @@ Point_2 FOptimus(const vector<Point_2>& pa, const Point_2& pm, const Point_2& av
             intersect.emplace_back(CGAL::to_double(tmp.x()), CGAL::to_double(tmp.y()));
         }
     }
-    std::cout << "--intersect: " << intersect.size() << std::endl;
+    // std::cout << "--intersect: " << intersect.size() << std::endl;
     for (auto& tmp : intersect) {
         std::cout << tmp << std::endl;
     }
@@ -82,10 +82,10 @@ Point_2 FOptimus(const vector<Point_2>& pa, const Point_2& pm, const Point_2& av
             validPoint.push_back(intersect[j]);
         }
     }
-    std::cout << "--validPoint: " << validPoint.size() << std::endl;
-    for (auto& tmp : validPoint) {
-        std::cout << tmp << std::endl;
-    }
+    // std::cout << "--validPoint: " << validPoint.size() << std::endl;
+    // for (auto& tmp : validPoint) {
+    //     std::cout << tmp << std::endl;
+    // }
     double minDist = INFINITY, minX = INFINITY, minY = INFINITY;
     for (const auto& tmp : validPoint) {
         if (sqrt((tmp - avg).squared_length()) <= minDist) {
