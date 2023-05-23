@@ -5,7 +5,7 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
     time = 0;
     distance = 0;
     stops = 0;
-
+    //此处修改
     VD voronoiDiagram;
     for (auto k : solutionSetsLabelsV) {
         voronoiDiagram.insert(V1[k]);
@@ -15,14 +15,14 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
         VD::Locate_result loc = voronoiDiagram.locate(p);
         if (VD::Face_handle* fh = boost::get<VD::Face_handle>(&loc)) {
             targetToVertice.emplace_back((*fh)->dual()->point(), p);
-            std::cout << "--pair: \n" << targetToVertice.back().first << '\n' << targetToVertice.back().second << std::endl;
+            // std::cout << "--pair: \n" << targetToVertice.back().first << '\n' << targetToVertice.back().second << std::endl;
         }
         else if (VD::Vertex_handle* vh = boost::get<VD::Vertex_handle>(&loc)) {
             Point_2 p1((*vh)->point().x() - eps, (*vh)->point().y() - eps);//avoid vertex
             VD::Locate_result loc1 = voronoiDiagram.locate(p1);
             if (VD::Face_handle* fh = boost::get<VD::Face_handle>(&loc1)) {
                 targetToVertice.emplace_back((*fh)->dual()->point(), p);
-                std::cout << "--pair: \n" << targetToVertice.back().first << '\n' << targetToVertice.back().second << std::endl;
+                // std::cout << "--pair: \n" << targetToVertice.back().first << '\n' << targetToVertice.back().second << std::endl;
             }
         }
     }
@@ -34,10 +34,10 @@ int UAVComputePath(const vector<Point_2>& coveredTarget, const MatrixXi& setCove
                 // std::cout << "--pair: \n" << pair.first << '\n' << pair.second << std::endl;
             }
         }
-        std::cout << "--subPath: " << subPath.size() << std::endl;
-        for (auto& tmp : subPath) {
-            std::cout << tmp << std::endl;
-        }
+        // std::cout << "--subPath: " << subPath.size() << std::endl;
+        // for (auto& tmp : subPath) {
+        //     std::cout << tmp << std::endl;
+        // }
         //TIME BASED SEARCHING
         VectorXi rteT;
         double dis, t;

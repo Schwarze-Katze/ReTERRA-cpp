@@ -4,6 +4,7 @@ inline int initTERRAParam();
 inline int TERRALaunch();
 inline int CBSResultOutput(const std::string& iterDir);
 inline int VisualizeResultOutput(const std::string& iterDir);
+inline int CompareUAVDist();
 
 namespace TERRAConfig {
     ConfigParam configParam;
@@ -15,6 +16,7 @@ namespace TERRAConfig {
 namespace TERRAResult {
     DataSolution dataSol;
     std::vector<PathSolution> pathSol;
+    std::vector<double> newdist, origindist;
 }
 
 int main() {
@@ -27,7 +29,7 @@ int main() {
 inline int initTERRAParam() {
     using namespace TERRAConfig;
     configParam = ConfigParam(1, true, true, false, "");
-    problemParam = ProblemParam(100, 0, 1, 0.5, 0.5, 200, "");
+    problemParam = ProblemParam(100, 0, 1, 1, 1, 200, "");
     ugvData = UGVData(0.4, 430, 9, 2, 0.06, 2, 2.7);
     uavData = UAVData(308, 0.5, 4, 4);
     return 0;
@@ -51,6 +53,10 @@ inline int TERRALaunch() {
         std::cout << "Finished computing scenario " << iter << std::endl;
         CBSResultOutput(iterDir);
         VisualizeResultOutput(iterDir);
+        CompareUAVDist();
+    }
+    for (int i = 0;i < configParam.iterations;++i) {
+        std::cout << TERRAConfig::problemParam.TargetCnt << ", " << TERRAResult::origindist[i] * 2 << ", " << TERRAResult::newdist[i] << std::endl;
     }
     return 0;
 }
@@ -111,7 +117,7 @@ inline int CBSResultOutput(const std::string& iterDir) {
     int idx = 0;
     while (!isdone) {
         isdone = true;
-        for (int i = 0;i < pathSol.size();++i) {
+        for (int i = 0;i < pathSol.size() - 1;++i) {
             auto& path = pathSol[i];
             YAML::Node agent;
             agent["name"] = "agent" + std::to_string(i);
@@ -120,19 +126,23 @@ inline int CBSResultOutput(const std::string& iterDir) {
                 agent["start"].push_back(int(path.uav2[idx].y()));
                 isdone = false;
             }
-            else {
+            else if (path.uav2.size()) {
                 agent["start"].push_back(int(path.uav2.back().x()));
                 agent["start"].push_back(int(path.uav2.back().y()));
             }
             std::vector<int> point(2);
             if (idx >= path.uav2.size() - 1) {
-                agent["potentialGoals"] = YAML::Null;
+                agent["goal"] = YAML::Null;
             }
-            else {
+            else if (path.uav2.size()) {
                 point = { int(path.uav2[idx + 1].x()),int(path.uav2[idx + 1].y()) };
-                agent["potentialGoals"].push_back(point);
+                // agent["potentialGoals"].push_back(point);
+                agent["goal"].push_back(int(path.uav2[idx + 1].x()));
+                agent["goal"].push_back(int(path.uav2[idx + 1].y()));
             }
-            agents.push_back(agent);
+            if (agent.size()>1) {
+                agents.push_back(agent);
+            }
         }
         config["map"] = map;
         config["agents"] = agents;
@@ -170,5 +180,23 @@ inline int VisualizeResultOutput(const std::string& iterDir) {
     std::fstream fOut(iterDir + "Visualize.yaml", std::ios::out | std::ios::trunc);
     fOut << visualize;
     fOut.close();
+    return 0;
+}
+
+inline int CompareUAVDist() {
+    // double newDist = TERRAResult::dataSol.uavDist;
+    double newDist = 0;
+    double originDist = 0;
+    auto GetDist = [](const Point_2& a, const Point_2& b) {
+        return sqrt((a - b).squared_length());
+    };
+    for (const auto& paths : TERRAResult::pathSol) {
+        for (int i = 1;i < paths.uav2.size();++i) {
+            originDist += GetDist(paths.uav2[i], paths.ugv);
+            newDist += GetDist(paths.uav2[i], paths.uav2[i - 1]);
+        }
+    }
+    TERRAResult::origindist.push_back(originDist);
+    TERRAResult::newdist.push_back(newDist);
     return 0;
 }
